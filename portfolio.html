@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amirshayan Hamidin, full stack engineer</title>
+<meta name="description" content="Portfolio of Amirshayan Hamidin, software engineer graduating from San Francisco State University in December 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E6EAEE; --dot:#C3CBD4; --card:#F8F9FA; --ink:#22272E; --muted:#5F6874;
+  --pencil:#5677C9; --firuzeh:#12807C; --line:#B5BFCA; --shadow:0 1px 0 rgba(34,39,46,.06),0 8px 24px rgba(34,39,46,.08);
+  --sans:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --hand:"Caveat","Segoe Print","Bradley Hand","Comic Sans MS",cursive;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C2229; --dot:#323B46; --card:#262E37; --ink:#E7EAEE; --muted:#9BA5B0;
+    --pencil:#86A2E6; --firuzeh:#41BDB6; --line:#3D4754; --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 28px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C2229; --dot:#323B46; --card:#262E37; --ink:#E7EAEE; --muted:#9BA5B0;
+  --pencil:#86A2E6; --firuzeh:#41BDB6; --line:#3D4754; --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 28px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--firuzeh);outline-offset:3px;border-radius:4px}
+.wash{background:color-mix(in srgb,var(--firuzeh) 12%,transparent)}
+
+/* canvas */
+#viewport{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--dot) 1.1px,transparent 1.2px);
+  background-size:24px 24px}
+#viewport.dragging{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#wires{position:absolute;left:-3000px;top:-3000px;width:6000px;height:6000px;overflow:visible;pointer-events:none}
+#wires path{fill:none;stroke:var(--pencil);stroke-width:1.4;stroke-dasharray:5 6;opacity:.55}
+
+.cluster{position:absolute;font-weight:650;font-stretch:112%;font-size:22px;letter-spacing:-.01em;color:var(--ink);white-space:nowrap;transition:opacity .25s}
+.cluster .n{display:inline-block;margin-left:8px;padding:0 8px;border-radius:999px;font-size:14px;line-height:22px;font-weight:600;font-stretch:100%;vertical-align:3px;color:var(--ink);background:color-mix(in srgb,var(--firuzeh) 14%,transparent);font-variant-numeric:tabular-nums}
+.cluster small{display:block;font-weight:400;font-stretch:100%;font-size:14px;color:var(--muted);letter-spacing:0}
+.cluster.dim{opacity:.3}
+
+.note{position:absolute;width:max-content;max-width:290px;font-family:var(--hand);font-size:23px;line-height:1.1;color:var(--pencil);pointer-events:none;transform:rotate(-2deg);transition:opacity .25s}
+.note svg{display:block;margin-top:2px;overflow:visible}
+.note path{fill:none;stroke:var(--pencil);stroke-width:1.6;stroke-linecap:round}
+.note.dim{opacity:.25}
+
+/* cards: a sketch layer over a render layer */
+.card{position:absolute;width:300px;padding:0;border:0;background:none;text-align:left;cursor:pointer;border-radius:3px;transition:opacity .25s}
+.card .rd{position:relative;display:block;min-height:168px;background:var(--card);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:18px 20px 16px;
+  opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease,border-color .2s,box-shadow .2s}
+.card .rd::before{content:"";position:absolute;left:20px;top:0;width:44px;height:3px;background:var(--firuzeh)}
+.card .sk{position:absolute;inset:0;border:1.6px dashed var(--pencil);border-radius:3px;padding:16px 20px;opacity:1;transition:opacity .35s ease}
+.card .sk span{font-family:var(--hand);font-size:27px;line-height:1.05;color:var(--pencil)}
+.card .sk i{display:block;margin-top:12px;height:1.5px;background:var(--pencil);opacity:.45;border-radius:2px}
+.card .sk i:nth-of-type(2){width:72%}
+.card .sk i:nth-of-type(3){width:48%}
+.card.rendered .rd{opacity:1;transform:none}
+.card.rendered .sk{opacity:0}
+.card:hover .rd,.card[aria-expanded="true"] .rd{border-color:var(--firuzeh)}
+.card.dim{opacity:.22}
+.card.hl .rd{border-color:var(--firuzeh);box-shadow:0 0 0 2px color-mix(in srgb,var(--firuzeh) 35%,transparent),var(--shadow)}
+.card h3{margin:2px 0 4px;font-size:18px;line-height:1.2;font-weight:650;font-stretch:104%;letter-spacing:-.005em}
+.card .stack{font-size:13px;color:var(--muted);margin:0 0 10px}
+.card .gist{font-size:14.5px;margin:0}
+.card .when{position:absolute;right:20px;top:16px;font-size:12.5px;color:var(--muted)}
+.card.wide{width:640px}
+.card.wide .rd{display:grid;min-height:0;grid-template-columns:1fr 1fr;gap:6px 28px;align-content:start}
+.card.wide h3{grid-column:1/-1}
+.kit{font-size:14px;margin:0}
+.kit b{display:block;font-weight:600;font-size:13px;color:var(--muted)}
+
+/* title block, in the manner of a drawing sheet */
+.title-block{position:absolute;width:420px;background:var(--card);border:1.5px solid var(--ink);border-radius:2px;box-shadow:var(--shadow);display:grid;grid-template-columns:118px 1fr;cursor:default}
+.tb-star{grid-row:1/4;display:grid;place-items:center;border-right:1px solid var(--ink)}
+.tb-star svg{width:78px;height:78px}
+.tb-star polygon{fill:none;stroke:var(--firuzeh);stroke-width:1.6;stroke-linejoin:round}
+.tb-star circle{fill:var(--firuzeh)}
+.tb-name{padding:14px 18px 10px;border-bottom:1px solid var(--ink)}
+.tb-name h1{margin:0;font-size:30px;line-height:.98;font-weight:780;font-stretch:118%;letter-spacing:-.02em}
+.tb-name p{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.tb-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--ink)}
+.tb-row:last-child{border-bottom:0}
+.tb-cell{padding:7px 12px 8px 18px;font-size:13.5px;line-height:1.3}
+.tb-cell + .tb-cell{border-left:1px solid var(--ink);padding-left:12px}
+.tb-cell b{display:block;font-size:11.5px;font-weight:500;color:var(--muted)}
+
+/* fixed chrome */
+.chrome{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:6px}
+#top{position:fixed;z-index:5;left:max(16px,env(safe-area-inset-left));top:calc(16px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:calc(100% - 32px)}
+#plate{padding:10px 14px;font-size:13.5px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#plate strong{font-weight:650;font-stretch:110%}
+#plate a{color:var(--muted);text-decoration:none}
+#plate a:hover{color:var(--firuzeh);text-decoration:underline}
+.chips{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+#filters{padding:3px}
+.chip{border:0;background:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:13px;white-space:nowrap;line-height:1.2}
+.chip:hover{background:color-mix(in srgb,var(--firuzeh) 8%,transparent)}
+.chip[aria-pressed="true"]{background:color-mix(in srgb,var(--firuzeh) 16%,transparent);font-weight:600}
+.chip .c{color:var(--muted);font-weight:400;margin-left:4px;font-variant-numeric:tabular-nums}
+.chip.skill{border:1px solid var(--firuzeh);font-weight:600;margin-left:4px}
+.chip.skill[hidden]{display:none}
+#tools{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;padding:4px;transition:left .3s ease}
+#tools button{border:0;background:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;white-space:nowrap}
+#tools button:hover{background:color-mix(in srgb,var(--firuzeh) 12%,transparent)}
+#tools .zoomgrp{display:contents}
+#tools #ovbtn{font-weight:600;color:var(--firuzeh)}
+#tools .sep{width:1px;align-self:stretch;margin:6px 2px;background:var(--line)}
+#zoomval{min-width:52px;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+#hint{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom,0px));font-family:var(--hand);font-size:22px;color:var(--pencil);white-space:nowrap;transition:opacity .6s,left .3s ease;pointer-events:none}
+
+/* tooltip */
+#tip{position:fixed;z-index:40;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:4px;padding:7px 10px;font-size:12.5px;line-height:1.35;max-width:270px;opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}
+#tip b{display:block;font-size:13.5px;font-weight:650;margin-bottom:1px}
+#tip span{display:block;color:var(--muted)}
+
+/* detail panel */
+#panel{position:fixed;z-index:9;top:calc(16px + env(safe-area-inset-top,0px));right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(540px,calc(100% - 32px));
+  background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);padding:26px 28px 0;overflow:auto;overscroll-behavior:contain;
+  transform:translateX(calc(100% + 40px));transition:transform .32s ease;visibility:hidden}
+#panel.open{transform:none;visibility:visible}
+#panel h2{margin:0 36px 4px 0;font-size:24px;line-height:1.15;font-weight:700;font-stretch:110%;letter-spacing:-.015em}
+#panel .stack{color:var(--muted);font-size:14px;margin:0 0 4px}
+#panel .when{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+#panel .when:empty{margin:0 0 10px}
+.lede{font-size:15.5px;line-height:1.55;margin:0 0 16px;max-width:62ch}
+#panel ul{padding-left:18px;margin:0 0 6px}
+#panel li{margin-bottom:9px;max-width:62ch}
+#panel li::marker,#doc li::marker{color:var(--firuzeh)}
+#panel .sec p{margin:0 0 10px;max-width:62ch}
+#panel h3{position:relative;margin:22px 0 8px;padding-top:10px;font-size:15px;line-height:1.25;font-weight:650;font-stretch:106%;letter-spacing:-.005em}
+#panel h3::before{content:"";position:absolute;left:0;top:0;width:28px;height:2px;background:var(--firuzeh)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em;padding:1px 4px;border-radius:3px;background:color-mix(in srgb,var(--firuzeh) 11%,transparent);white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;margin:0 0 16px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.stats div{background:var(--card);padding:10px 12px 9px}
+.stats b{display:block;font-size:19px;line-height:1.1;font-weight:700;font-stretch:108%;color:var(--ink)}
+.stats sup{font-size:.62em;line-height:0;vertical-align:.5em}
+.stats span{display:block;margin-top:3px;font-size:12.5px;line-height:1.3;color:var(--muted)}
+.stats div::before{content:"";display:block;width:16px;height:2px;margin-bottom:7px;background:var(--firuzeh)}
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 6px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;line-height:1.4}
+.facts dt{color:var(--muted);font-size:12.5px;font-weight:500;padding-top:1px}
+.facts dd{margin:0}
+#panel .aside{font-family:var(--hand);font-size:23px;line-height:1.15;color:var(--pencil);margin:18px 0 0}
+#panel .aside:empty{display:none}
+#close{position:absolute;top:14px;right:14px;width:36px;height:36px;border:0;border-radius:4px;background:none;cursor:pointer;font-size:22px;line-height:1}
+#close:hover{background:color-mix(in srgb,var(--firuzeh) 12%,transparent)}
+#p-foot{position:sticky;bottom:0;z-index:1;margin:22px -28px 0;padding:10px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:none;border-radius:4px;padding:7px 12px;cursor:pointer;font-size:13.5px;text-decoration:none;white-space:nowrap;line-height:1.3}
+.btn:hover{border-color:var(--firuzeh);color:var(--firuzeh)}
+#p-foot .grow{flex:1}
+#p-count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.badge{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--ink);background:color-mix(in srgb,var(--firuzeh) 14%,transparent);border:1px solid color-mix(in srgb,var(--firuzeh) 45%,transparent)}
+.finds{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:4px 0 12px}
+.find{display:grid;grid-template-columns:132px 1fr;gap:14px;align-items:start;background:var(--card);padding:14px 16px}
+.find > b{font-size:21px;line-height:1.15;font-weight:750;font-stretch:110%;color:var(--firuzeh)}
+#panel .find p,#doc .find p,.find p{margin:0;max-width:62ch}
+.find .ft{font-size:14.5px;font-weight:650}
+.find .fd{font-size:13.5px;margin-top:3px;line-height:1.45}
+#panel .fintro,.fintro{font-size:14px;color:var(--muted);margin:0 0 10px}
+.fails{display:grid;gap:10px;margin:0 0 12px}
+.fail{border:1px solid var(--line);border-radius:6px;padding:12px 14px 10px;background:var(--card)}
+.fhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fail .tag{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;padding:2px 7px;border-radius:3px;border:1px solid var(--line)}
+.fail .x{font-size:12.5px;font-weight:650;color:var(--pencil)}
+.fail .got{margin-left:auto;font-size:13px;font-weight:650;font-variant-numeric:tabular-nums}
+#panel .fail p,#doc .fail p,.fail p{margin:0 0 6px;max-width:62ch}
+.fail .hyp{font-size:14.5px;font-weight:600;line-height:1.4}
+.fail dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0;font-size:13.5px;line-height:1.45}
+.fail dt{color:var(--muted);font-size:12.5px;padding-top:1px}
+.fail dd{margin:0}
+@media (max-width:640px){.find{grid-template-columns:1fr;gap:4px}.fail dl{grid-template-columns:1fr;gap:1px}.fail dd{margin-bottom:5px}}
+/* figures */
+.fig{margin:4px 0 14px}
+.fig .fs{display:block;width:100%;height:auto;overflow:visible}
+.fig figcaption{font-size:12.5px;line-height:1.4;color:var(--muted);margin-top:6px;max-width:62ch}
+.fs text{font-family:var(--sans);font-size:12.5px;fill:var(--ink)}
+.fs .b{font-weight:600}
+.fs .m{fill:var(--muted)}
+.fs .s{font-size:11.5px}
+.fs .big{font-size:26px;font-weight:700;font-stretch:108%}
+.fs .bx{fill:var(--card);stroke:var(--line);stroke-width:1.2}
+.fs .bx.em{stroke:var(--firuzeh);stroke-width:1.6;fill:color-mix(in srgb,var(--firuzeh) 7%,var(--card))}
+.fs .zone{fill:none;stroke:var(--line);stroke-width:1.2}
+.fs .ln{fill:none;stroke:var(--muted);stroke-width:1.3}
+.fs .ln.em{stroke:var(--firuzeh);stroke-width:1.6}
+.fs .ln.w2{stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fs .ax{stroke:var(--line);stroke-width:1;fill:none}
+.fs .ln.ann{stroke:var(--pencil)}
+.fs text.ann{fill:var(--pencil)}
+.fs .flr{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.fs .ah{fill:var(--muted)}
+.fs .ah.em{fill:var(--firuzeh)}
+.fs .dot{fill:var(--firuzeh);stroke:var(--card);stroke-width:2}
+.fs .ring{fill:var(--card);stroke:var(--muted);stroke-width:2}
+.fs .cell{fill:var(--firuzeh)}
+.fs .cell.no{fill:none;stroke:var(--muted);stroke-width:1.2}
+.fs .node{fill:var(--card);stroke:var(--line);stroke-width:1.2}
+.fs .node.em{stroke:var(--firuzeh);stroke-width:1.8;fill:color-mix(in srgb,var(--firuzeh) 9%,var(--card))}
+.fs .hit{fill:transparent}
+.fs .cross{stroke:var(--ink);stroke-width:1;opacity:0}
+.fs .cross.on,.fs .crossdot.on{opacity:1}
+.fs .crossdot{fill:var(--ink);stroke:var(--card);stroke-width:2;opacity:0}
+.fs .done{fill:var(--firuzeh)}
+.fs .half{fill:color-mix(in srgb,var(--firuzeh) 45%,var(--card));stroke:var(--firuzeh);stroke-width:1.6}
+.fs .chk{fill:none;stroke:var(--card);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* skills matrix */
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mx{border-collapse:collapse;font-size:13px;line-height:1.2;margin:0 0 4px}
+.mx th,.mx td{padding:0;height:24px;font-weight:400}
+.mx thead th{vertical-align:bottom;padding-bottom:6px}
+.mx thead th.col{width:40px;height:96px}
+.mx thead th.col button{writing-mode:vertical-rl;transform:rotate(180deg);border:0;background:none;padding:4px 2px;cursor:pointer;font-size:12.5px;font-weight:600;white-space:nowrap;border-radius:3px}
+.mx thead th.col button:hover{color:var(--firuzeh)}
+.mx thead th.cnt{text-align:left;font-size:12px;color:var(--muted);padding-left:10px}
+.mx .grp th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:12px 0 4px}
+.mx tr.sk{border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.mx tr.sk th{text-align:left;padding-right:12px;white-space:nowrap}
+.mx tr.sk th button{border:0;background:none;padding:3px 6px 3px 0;cursor:pointer;font-size:13px;text-align:left}
+.mx tr.sk th button:hover{color:var(--firuzeh)}
+.mx td.c{width:40px;text-align:center}
+.mx .d{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--firuzeh);box-shadow:0 0 0 2px var(--card)}
+.mx td.n{padding-left:10px;white-space:nowrap;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mx .nb{display:inline-block;height:6px;border-radius:0 3px 3px 0;background:var(--firuzeh);opacity:.55;vertical-align:middle;margin-right:6px}
+.mx tr.sk:hover td,.mx tr.sk:hover th,.mx .colhl{background:color-mix(in srgb,var(--firuzeh) 8%,transparent)}
+.mx tr.sk.on td,.mx tr.sk.on th{background:color-mix(in srgb,var(--firuzeh) 15%,transparent)}
+.mx tr.sk.on th button{font-weight:650}
+.mx .off{opacity:.3}
+.also{font-size:13px;color:var(--muted);margin:8px 0 0}
+.also b{color:var(--ink);font-weight:600}
+
+/* overview and plain reading views */
+.view{position:fixed;inset:0;z-index:8;background:var(--paper);overflow:auto;display:none;padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(48px + env(safe-area-inset-bottom,0px))}
+.view.open{display:block}
+.view header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.view h1{margin:0;font-size:34px;line-height:1;font-weight:780;font-stretch:118%;letter-spacing:-.02em}
+.view .meta{color:var(--muted);font-size:14px;margin:0 0 8px}
+.hbtns{display:flex;gap:8px}
+.hbtns .btn{background:var(--card)}
+#ov .wrap{max-width:1080px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px 13px;box-shadow:var(--shadow)}
+.kpi::before{content:"";display:block;width:22px;height:3px;background:var(--firuzeh);margin-bottom:10px}
+.kpi b{display:block;font-size:30px;line-height:1.05;font-weight:700;font-stretch:110%;letter-spacing:-.01em}
+.kpi span{display:block;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.3}
+.ovbar{position:sticky;top:calc(-24px - env(safe-area-inset-top,0px));z-index:2;margin:18px -20px 0;padding:10px 20px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.ovbar .lab{font-size:12.5px;color:var(--muted)}
+.ovbar .chips{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3px}
+.osec{background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);padding:20px 22px 18px;margin-top:16px}
+.osec > h2{margin:0;font-size:19px;font-weight:650;font-stretch:110%}
+.osec > .sub{margin:2px 0 12px;font-size:13.5px;color:var(--muted)}
+.ogrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+.ogrid .osec{margin-top:16px}
+
+/* timeline */
+.tl{position:relative;--lane:112px;margin-top:6px}
+.tl-bg{position:absolute;left:var(--lane);right:0;top:0;bottom:0;pointer-events:none}
+.tl-band{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.tl-band.alt{background:color-mix(in srgb,var(--ink) 3.5%,transparent)}
+.tl-band b{position:absolute;top:2px;left:8px;font-size:12px;font-weight:600;white-space:nowrap}
+.tl-band .ls{display:none}
+.tl-tick{position:absolute;top:24px;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.tl-now{position:absolute;top:0;bottom:0;border-left:1.5px solid var(--pencil)}
+.tl-now span{position:absolute;bottom:-20px;left:0;transform:translateX(-50%);font-family:var(--hand);font-size:19px;color:var(--pencil);white-space:nowrap}
+.tl-head{height:44px}
+.tl-row{position:relative;display:grid;grid-template-columns:var(--lane) 1fr;height:38px}
+.tl-row.first{border-top:1px solid var(--line)}
+.tl-lane{font-size:12.5px;font-weight:600;padding:12px 8px 0 0}
+.tl-plot{position:relative}
+.tl-bar{position:absolute;top:22px;height:10px;border:0;padding:0;border-radius:2px 4px 4px 2px;cursor:pointer;background:var(--firuzeh)}
+.tl-bar::before,.tl-pt::before{content:"";position:absolute;inset:-9px -4px}
+.tl-bar.static{cursor:default}
+.tl-pt{position:absolute;top:21px;width:12px;height:12px;margin-left:-6px;border:0;padding:0;transform:rotate(45deg);background:var(--firuzeh);box-shadow:0 0 0 2px var(--card);cursor:pointer;border-radius:1px}
+.tl-pt.static{cursor:default}
+.tl-lab{position:absolute;top:3px;font-size:12.5px;white-space:nowrap;pointer-events:none;padding:0 3px;text-shadow:0 0 3px var(--card),0 0 3px var(--card),0 0 2px var(--card)}
+.tl-lab.end{transform:translateX(-100%)}
+.tl-row.off .tl-bar,.tl-row.off .tl-pt,.tl-row.off .tl-lab{opacity:.25}
+.tl-bar:hover,.tl-pt:hover{filter:brightness(1.12)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);margin:30px 0 0}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.lg-bar{width:22px;height:8px;border-radius:2px;background:var(--firuzeh)}
+.lg-rest{width:22px;height:8px;border-radius:2px;background:color-mix(in srgb,var(--firuzeh) 32%,var(--card))}
+.lg-fade{width:22px;height:8px;border-radius:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--firuzeh) 12%,var(--card)),var(--firuzeh))}
+.lg-pt{width:9px;height:9px;transform:rotate(45deg);background:var(--firuzeh)}
+.lg-now{width:0;height:14px;border-left:1.5px solid var(--pencil)}
+
+/* index */
+.ix{display:grid;gap:0}
+.ix-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 112px auto;gap:14px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.ix-row:first-child{border-top:0}
+.ix-row.off{opacity:.3}
+.ix-row b{display:block;font-size:15px;font-weight:650}
+.ix-row .g{display:block;font-size:13.5px;color:var(--muted);margin-top:1px}
+.ix-row .st{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.ix-row .ar{font-size:12.5px}
+.ix-row .ar::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--firuzeh);margin-right:6px;vertical-align:1px}
+.ix-row .wh{font-size:12.5px;color:var(--muted)}
+
+/* plain reading view */
+#doc article{max-width:700px;margin:0 auto}
+#doc h2{font-size:19px;font-weight:650;font-stretch:110%;margin:30px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+#doc h3{font-size:17px;margin:26px 0 2px;font-weight:650;font-stretch:106%}
+#doc h4{font-size:14.5px;margin:14px 0 4px;font-weight:620}
+#doc p,#doc li{max-width:68ch}
+#doc .facts{max-width:68ch;margin:8px 0 4px}
+#doc ul{padding-left:18px;margin:6px 0}
+#doc li{margin-bottom:6px}
+#doc .sec p{margin:4px 0 8px}
+#doc .fig{max-width:560px}
+
+@media (max-width:860px){
+  .ogrid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  #plate{font-size:12.5px;gap:10px}
+  .chip{padding:5px 8px;font-size:12.5px}
+  #panel{top:auto;left:8px;right:8px;width:auto;max-height:82%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateY(calc(100% + 40px));padding:22px 18px 0}
+  #panel.open{transform:none}
+  #p-foot{margin:20px -18px 0;padding-left:12px;padding-right:12px;flex-wrap:nowrap;gap:6px}
+  #p-foot .btn{padding:7px 10px;font-size:13px}
+  #p-count{display:none}
+  #panel .facts{grid-template-columns:1fr;gap:2px}
+  #panel .facts dd{margin-bottom:6px}
+  #tools .zoomgrp{display:none}
+  #tools button{padding:8px 9px;font-size:13px}
+  #hint{font-size:19px}
+  .view{padding-left:14px;padding-right:14px}
+  .view h1{font-size:28px}
+  .ovbar{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
+  .osec{padding:16px 14px 14px}
+  .tl{--lane:66px}
+  .tl-tick{display:none}
+  .tl-band .lf{display:none}
+  .tl-band .ls{display:inline}
+  .tl-lab .grad{display:none}
+  .tl-head{height:28px}
+  .tl-band b{font-size:11px;left:4px}
+  .tl-lab{font-size:11.5px}
+  .tl-lane{font-size:11.5px}
+  .ix-row{grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+  .ix-row .ar,.ix-row .wh{grid-row:2;font-size:12px}
+  .ix-row .ar{grid-column:1}
+  .ix-row .wh{display:none}
+  .ix-row .btn{grid-row:1/3;grid-column:2}
+  .mx td.n,.mx thead th.cnt{display:none}
+}
+@media (min-width:641px){
+  body.panel-open #tools,body.panel-open #hint{left:calc((100% - min(540px,100% - 32px) - 16px)/2)}
+}
+@media (prefers-reduced-motion:reduce){
+  .card .rd,.card .sk,#panel,#hint,#tools,.card,.cluster{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <div id="plate" class="chrome" role="banner">
+    <strong>Amirshayan Hamidin</strong>
+    <a href="mailto:hamideinamirshayan@gmail.com">Email</a>
+    <a href="https://www.linkedin.com/in/amirshayan-hamidin" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/AmirshayanHamidin" target="_blank" rel="noopener">GitHub</a>
+  </div>
+  <div id="filters" class="chrome chips" role="toolbar" aria-label="Filter the board"></div>
+</div>
+
+<div id="viewport" aria-label="Portfolio canvas. Drag to move, use the toolbar to zoom.">
+  <div id="world">
+    <svg id="wires" aria-hidden="true"></svg>
+  </div>
+</div>
+
+<div id="hint" aria-hidden="true">drag to look around, tap a card to open it</div>
+
+<div id="tools" class="chrome" role="toolbar" aria-label="Canvas controls">
+  <span class="zoomgrp">
+    <button id="zout" aria-label="Zoom out">&minus;</button>
+    <span id="zoomval" aria-live="polite">100%</span>
+    <button id="zin" aria-label="Zoom in">+</button>
+    <span class="sep"></span>
+  </span>
+  <button id="fit">Fit</button>
+  <button id="sketch" aria-pressed="false">Sketch</button>
+  <span class="sep"></span>
+  <button id="ovbtn">Overview</button>
+  <button id="read">Read as page</button>
+</div>
+
+<aside id="panel" aria-hidden="true" aria-labelledby="p-title">
+  <button id="close" aria-label="Close details">&times;</button>
+  <h2 id="p-title"></h2>
+  <p class="stack" id="p-stack"></p>
+  <p class="when" id="p-when"></p>
+  <div id="p-body"></div>
+  <p class="aside" id="p-aside"></p>
+  <nav id="p-foot" aria-label="Browse projects">
+    <button id="p-prev" class="btn" type="button">&larr; Previous</button>
+    <button id="p-next" class="btn" type="button">Next &rarr;</button>
+    <span id="p-count"></span>
+    <span class="grow"></span>
+    <a id="p-ask" class="btn" href="mailto:hamideinamirshayan@gmail.com">Ask me about this</a>
+  </nav>
+</aside>
+
+<div id="ov" class="view" role="dialog" aria-modal="true" aria-label="Portfolio overview">
+  <div class="wrap" id="ov-body"></div>
+</div>
+
+<div id="doc" class="view" role="dialog" aria-modal="true" aria-label="Portfolio as a page">
+  <article id="doc-body"></article>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* content: every fact below comes from Amirshayan's own write ups, resumes, and project notes */
+var ME = {
+  name:"Amirshayan Hamidin",
+  role:"Full stack engineer, graduating Dec 2026",
+  school:"San Francisco State University",
+  degree:"B.S. Computer Science, Minor in Mathematics",
+  gpa:"4.00 at SFSU, 3.9 overall",
+  auth:"Authorized to work in the U.S., no sponsorship required"
+};
+
+var GROUPS = [
+  {k:"research", t:"Research"},
+  {k:"build", t:"Built"},
+  {k:"teach", t:"Teaching"}
+];
+
+var CARDS = [
+  {id:"chat", group:"build", x:340, y:-330, title:"Real time chat client", short:"Chat client", stack:"Java, JavaFX, REST, WebSockets",
+   gist:"Live rooms, presence and history over WebSockets, with a UI that never waits on the network.",
+   summary:"A desktop chat application written in Java with a JavaFX interface. People log in, find or create rooms, read earlier messages, see who else is online, and talk in real time.",
+   sections:[
+     {h:"What it does", list:[
+       "Log in, then browse the available rooms or create a new one.",
+       "Open a room and its message history loads.",
+       "See who is online through live presence updates.",
+       "Send and receive messages instantly over a WebSocket that carries traffic in both directions."]},
+     {h:"How it works", fig:"chat", cap:"Network calls run off the JavaFX application thread. Arrows pointing into the interface are results handed back through Platform.runLater().",
+      p:"The client talks to the server in two ways. REST calls, authenticated with a bearer token, handle the request and response operations, and a WebSocket connection stays open so new messages and presence changes arrive the moment they happen. Gson converts between Java objects and the JSON on the wire."},
+     {h:"Keeping the interface responsive", p:"All networking runs on background threads, never on the JavaFX application thread, because a slow response there would freeze the whole window. JavaFX only lets the interface be changed from that one thread, so every update that arrives in the background is handed back through <code>Platform.runLater()</code>. The window keeps responding to typing and clicks however slow the network is."}
+   ],
+   aside:"like many people on one shared board"},
+
+  {id:"cache", group:"build", x:680, y:-330, title:"Read through cache over MySQL", short:"Cache", stack:"C++, MySQL Connector/C++", when:"Spring 2026",
+   gist:"Three data structures kept in sync on every insert and eviction, backed by a database.",
+   summary:"A cache for customer records in C++ that keeps one copy of each record reachable three ways: by key, in arrival order, and in sorted order. When a record is not in the cache, it is read from MySQL and added.",
+   facts:[["Course","CSC 340, SFSU, built across four milestones"],["Language","C++17"],["Database","MySQL through MySQL Connector/C++"],["Design docs","UML class and sequence diagrams"]],
+   sections:[
+     {h:"Three structures, one record", fig:"cache", cap:"Illustration with sample keys. The list owns each record, and the hash table and the tree point at that same node.", list:[
+       "A <b>hash table</b> with separate chaining finds a record by key in constant time on average. The hash is the key modulo the bucket count, with a guard for negative keys.",
+       "A <b>doubly linked list</b> keeps records in first in, first out order, newest at the head and oldest at the tail, so the next record to evict is always the tail.",
+       "A <b>binary search tree</b> keeps keys sorted for ascending or descending listings and for range queries between two keys.",
+       "The record itself (key, name, address, city, state, zip) is stored once, in a list node. The hash and tree nodes hold non owning pointers to it, so no data is duplicated."]},
+     {h:"Keeping them consistent", p:"When the cache is full, adding a record first evicts the oldest one from all three structures. Removal always runs in the same order, hash and tree entries first, then the list node, because the list is the only owner and is the one that frees the memory. Duplicate keys are ignored on insert so the three views can never disagree, and deleting a tree node with two children uses its in order successor."},
+     {h:"The database path", p:"On a cache miss the program queries MySQL through MySQL Connector/C++ with a prepared statement, builds the record from the result, and inserts it like any other entry. File paths, the cache size, and the hash table size come from a JSON configuration file instead of being compiled in."},
+     {h:"Testing", p:"The program runs test cases from a JSON input file and writes every result to an output file. Its output for the reference test case matched the expected file byte for byte."}
+   ],
+   aside:"correctness first, then speed"},
+
+  {id:"vm", group:"build", x:1020, y:-330, title:"Bytecode interpreter", short:"Interpreter", stack:"Java",
+   gist:"A stack based virtual machine with its own simulated heap and memory safety checks.",
+   summary:"A virtual machine in Java that runs programs written in a small bytecode language. It loads the program, resolves its labels, and then fetches and executes one instruction at a time on a runtime stack, inside its own checked memory.",
+   stats:[["21","bytecode operations"],["2 MB","simulated heap"],["2","passes to resolve labels"]],
+   sections:[
+     {h:"How the pieces fit", fig:"vm", cap:"From program file to execution."},
+     {h:"Loading a program", p:"Each of the 21 bytecode operations is mapped to its own Java class. The loader reads a bytecode program and creates each instruction object from its name through Java reflection."},
+     {h:"Resolving labels", p:"Jumps and calls are written against symbolic labels. A first pass records the address of every label, and a second pass replaces each label reference with that address, so the running program only ever jumps to numbers."},
+     {h:"Running it", p:"A fetch and execute loop takes one instruction at a time. Operands live on a runtime stack, and stack frames mark where each function's values begin, so a call can open a fresh frame and a return can restore the caller's. The instruction set covers arithmetic, branching, calls and returns, and input and output."},
+     {h:"Simulated memory", p:"The machine also simulates a 2 MB heap. Every memory access is checked, so an access outside the heap's bounds, an invalid address, or a use of memory after it was freed is caught instead of silently corrupting the program."}
+   ]},
+
+  {id:"team", group:"build", x:340, y:-40, title:"Team web application", short:"Team app", stack:"Python, Flask, MySQL, Nginx, AWS EC2", when:"Fall 2026",
+   gist:"GitHub maintainer for a team web app, owning the repository and merge workflow.",
+   summary:"A web application built by Team 10 in CSC 648 Software Engineering at SFSU and deployed on AWS. My role is GitHub maintainer: I own the shared repository and the workflow that brings everyone's work together.",
+   facts:[["Course","CSC 648 Software Engineering, SFSU"],["Team","Team 10"],["My role","GitHub maintainer"],["Status","In progress, Fall 2026"]],
+   sections:[
+     {h:"The stack", fig:"team", cap:"The request path through the server, and the repository workflow I run.", p:"The application runs on an Ubuntu Server 24.04 instance on AWS EC2. Nginx receives web traffic and passes requests to Gunicorn, which runs the Python Flask application, and Flask stores its data in MySQL 8. The front end is HTML5 and CSS3."},
+     {h:"My role", p:"I run the team's shared repository and its merge workflow, which is where every teammate's work comes together, so the code the whole team builds on stays in one consistent place."}
+   ]},
+
+  {id:"shell", group:"build", x:680, y:-40, title:"Unix shell with pipes", short:"Shell", stack:"C", when:"Fall 2026",
+   gist:"A command shell that runs programs and chains processes through pipes.",
+   summary:"A small command shell in C that runs on top of Linux. It prints a prompt, reads a command line, runs each command in its own child process, and connects commands joined with <code>|</code> so the output of one becomes the input of the next.",
+   facts:[["Course","CSC 415 Operating Systems, SFSU"],["System calls","<code>fork</code>, <code>execvp</code>, <code>pipe</code>, <code>dup2</code>, <code>waitpid</code>"],["Status","Completed, September 2026"]],
+   sections:[
+     {h:"From prompt to output", fig:"shell", cap:"How the parent wires three commands together with two pipes.", list:[
+       "<b>Read.</b> The line is read with <code>fgets</code> into an 85 byte buffer, so it can never overflow. If a line is longer than 84 characters, the rest is read and thrown away so it cannot run as a second command.",
+       "<b>Parse.</b> One pass over the line, in place, with no copying or allocation. Each word is ended with a null byte and each <code>|</code> ends a command with a NULL, so every command is already an argument vector ready for <code>execvp</code>. Quoted text stays one argument, as in bash.",
+       "<b>Check.</b> Empty lines, lines of only spaces, a <code>|</code> with nothing on one side, and unmatched quotes are reported, and the shell prompts again. <code>exit</code> is handled by the shell itself, since running it in a child would only end the child.",
+       "<b>Run.</b> For n commands the shell creates n minus 1 pipes, then forks n children. Each child connects its input and output to the right pipe ends with <code>dup2</code>, closes every pipe descriptor, and calls <code>execvp</code>.",
+       "<b>Report.</b> The parent closes its own pipe ends, waits for every child in order so no zombie processes remain, and prints each child's PID and exit status, or the signal that ended it."]},
+     {h:"Bugs I found and fixed", list:[
+       "<b>A pipeline that never finished.</b> With the parent's pipe ends left open, <code>cat /etc/hostname | wc -l</code> hung, because <code>wc</code> only sees end of file once every copy of the write end is closed. One routine now closes all pipe ends in every child and in the parent, and listing <code>/proc/self/fd</code> inside the shell shows no leaked descriptors.",
+       "<b>Input read twice.</b> When <code>execvp</code> failed and the child ended with <code>exit()</code>, the stdio cleanup moved the shared input's file offset back, so the parent read the same lines again. The child now ends with <code>_exit(127)</code>, the code bash uses for a command it cannot run.",
+       "<b>A separator that vanished.</b> In <code>ls|wc -l</code>, writing the null byte that ends <code>ls</code> could erase the <code>|</code> before the parser saw it, silently merging two commands into one. The parser now saves the separator before ending the word.",
+       "<b>Output out of order.</b> When output goes to a file it is fully buffered, so an error could print before the command that caused it, and a child could print a copy of buffered text. The shell now flushes after the prompt and right before every fork."]},
+     {h:"Testing", p:"Every case ran side by side in this shell and in bash: a command file, two and four command pipelines, the error cases, a line of more than 100 characters, a descriptor leak check, and <code>ps</code> to confirm no defunct processes. Quote handling is intentionally simple, with no backslash escapes, variables, or wildcard expansion."}
+   ]},
+
+  {id:"shotwall", group:"research", x:-900, y:-330, w:340, title:"The Shot Wall", short:"Shot Wall", stack:"Python, Qiskit, IBM Quantum", when:"Jan 2026 to now", badge:"Predicts noisy accuracy before any run, R² 0.946",
+   gist:"Quantum machine learning under finite measurement budgets, advised by Prof. E. Wes Bethel.",
+   summary:"A study of quantum reservoir computing under a realistic measurement budget. A quantum reservoir can look very accurate on paper, but real hardware can only estimate its features from a limited number of repeated measurements, called shots. The Shot Wall measures how much accuracy survives that limit, and why regression suffers far more than classification.",
+   leadFinds:true,
+   facts:[["Advisor","Prof. E. Wes Bethel, SFSU, Research Affiliate at Lawrence Berkeley National Laboratory"],["Format","Independent research since January 2026, continued as CSC 699 Independent Study"],["Tools","Python, NumPy, SciPy, scikit learn, Qiskit, Qiskit Aer, IBM Quantum"],["Code","About 4,400 lines of Python, private until publication, available on request"],["Status","Preprint in preparation"]],
+   sections:[
+     {h:"How the model works", p:"Each input value is encoded as a rotation on the qubits of a six qubit reservoir. The reservoir then evolves under fixed dynamics that are never trained. Measuring the qubits produces the features, and a linear readout trained on those features is the only part of the model that learns."},
+     {h:"The shot wall", fig:"wall", cap:"Normalized mean squared error on a log scale, lower is better. A filled dot is the quantum reservoir, the open ring is a model with no quantum features.",
+      p:"With exact expectation values the reservoir reaches a normalized mean squared error of 0.003. With 40,000 shots, the best error mitigated result is 0.142 to 0.152 across seeds (mean 0.148), no better than a floor that uses no quantum features at all (0.148). That gap between ideal and realistic is the shot wall."},
+     {h:"Why shots are the bottleneck", fig:"shots", cap:"Worst case standard error of one measured feature, 1/√N, on log scales. Hover the line to read any shot count.",
+      p:"Each measurement returns a single 0 or 1, so every feature is an average estimated from repeated shots, and its error shrinks only with the square root of the shot count. One more decimal digit of precision costs about a hundred times more shots. Predicting an exact number needs many digits while a yes or no decision needs few, which is why the limit hits regression hard and largely spares classification."},
+     {h:"Accuracy model and hardware check", fig:"hw", cap:"Live run on IBM Quantum hardware. Filled squares are correct points, open squares are misses.", list:[
+       "A parameter free probit model predicts a noisy classifier's accuracy before any noisy run, with R<sup>2</sup> = 0.946 and a mean absolute error of 3.25 percentage points.",
+       "On real IBM Quantum hardware (<code>ibm_marrakesh</code>, 6,000 shots) a parity classification task scored 39 of 44 (0.886), the best of four readout settings.",
+       "With both models tuned equally, a classical echo state network matches or beats the quantum reservoir on the NARMA5 benchmark (normalized error 0.0120 against 0.0145)."]},
+     {h:"Six hypotheses that failed, and what each one taught", fails:true},
+     {h:"How the study is run", p:"Hypotheses and numeric success criteria are written down before any data is collected. Every run is seeded so it can be reproduced exactly, tuning happens on a validation split that never touches test data, independent reruns reproduce every output file, and results are checked against a written verification standard. Every published number was rerun from committed code, numbers that did not reproduce were corrected and kept on the record, and the six hypotheses that failed are explained above."},
+     {h:"Context and what is next", p:"A review of 18 related papers, most from the past year, sharpened the framing: fair, equally tuned classical baselines remove most of the reported quantum advantage, and finite measurement removes what is left. Three new benchmarks are running, one testing a shot grouping readout, one placing the accuracy model inside the capacity framework of Hu and colleagues, and one testing whether the classification limit comes from the information itself or only from the linear readout. A preprint follows."}
+   ],
+   aside:"six hypotheses failed, reported anyway"},
+
+  {id:"hitl", group:"research", x:-900, y:-40, w:340, title:"Human in the loop ML for robotics", short:"Robotics study", stack:"Independent study", when:"Aug 2026 to now",
+   gist:"When should a person correct, guide, or override a robot, and how should that feedback train it?",
+   summary:"An independent study with Prof. Isabel H. J. Song on when a person should correct, guide, or override an autonomous robot, and how that feedback should flow back into the robot's learning. The team is answering it from the field, by studying robots that are already deployed and the engineers who run them.",
+   facts:[["Advisor","Prof. Isabel H. J. Song, SFSU"],["Format","CSC 699 Independent Study, small research team"],["My part","The software side, with weekly technical deliverables"]],
+   sections:[
+     {h:"Where the study stands", fig:"hitl", cap:"Study progress as of October 2026."},
+     {h:"Approach", p:"The study is modeled on the UC Berkeley paper Measuring Agents in Production and adapts its interview protocol from software agents to physical robots. The goal is to reach 10 to 20 companies with robots in production or in a serious customer pilot and to interview the engineers behind them. Interviews are confidential, and each one is written up as a memo afterward."},
+     {h:"What I have done so far", list:[
+       "Presented the field's core vocabulary with a teammate: robot hardware (manipulators, mobile robots, end effectors, degrees of freedom, actuators), perception, planning and control, autonomy and human involvement (teleoperation, intervention, fallback), physical AI (foundation models, vision language action models, world models, policies), robot learning (imitation learning, reinforcement learning, fine tuning), and simulation (digital twins, the sim to real gap).",
+       "Presented the final part of Measuring Agents in Production, covering how deployed agents are evaluated, what makes deploying them hard, and the paper's conclusion, framed as the template for our robot study.",
+       "Contributed to the team's survey of real robot deployments, which records each deployment's customer, site, task, stage, autonomy level, human intervention, and public evidence.",
+       "Held the study's first industry conversation, on designing for safety in human in the loop systems, and presented the findings to Prof. Song in October 2026."]}
+   ]},
+
+  {id:"grader", group:"teach", x:-900, y:290, title:"Teaching assistant", short:"TA", stack:"CSC 413 Software Development, SFSU", when:"Fall 2026",
+   gist:"TA for an upper division course: grade software development projects and support the weekly hands on workshops.",
+   summary:"Teaching assistant for CSC 413 Software Development, an upper division course at SFSU that I completed myself. Selected by the instructor, I grade student projects and help run the weekly hands on workshops.",
+   facts:[["Role","Teaching assistant"],["Course","CSC 413 Software Development, SFSU"],["Selected by","The course instructor"],["Work","Project grading and weekly in class workshops"]]},
+
+  {id:"guest", group:"teach", x:-560, y:290, title:"Guest lecturer and reader", short:"Guest lecturer", stack:"CSC 300, SFSU", when:"Fall 2026",
+   gist:"Guest lecturing two sessions, including an introduction to quantum computing, and grading written assignments.",
+   summary:"Guest lecturer for CSC 300 at SFSU, teaching two class sessions, one of them an introduction to quantum computing. I am also the course reader, grading written assignments and giving assessment opinions.",
+   facts:[["Roles","Guest lecturer and reader"],["Course","CSC 300, SFSU"],["Guest sessions","Two, including an introduction to quantum computing"]],
+   sections:[
+     {h:"What the work involves", list:[
+       "Guest lecture two class sessions, including an introduction to quantum computing.",
+       "Grade written assignments and give assessment opinions."]}
+   ]},
+
+  {id:"tutor", group:"teach", x:-220, y:290, title:"Computer science tutor", short:"Tutor", stack:"Tutoring and Academic Support Center, SFSU", when:"2025 to now",
+   gist:"One on one tutoring for more than one hundred students.",
+   summary:"One on one tutoring at SFSU's Tutoring and Academic Support Center for more than one hundred students, in person and over Zoom.",
+   stats:[["100+","students tutored"],["5","subject areas"]],
+   facts:[["Where","Tutoring and Academic Support Center, SFSU"],["Format","One on one, in person and over Zoom"],["Students","More than one hundred"]],
+   sections:[
+     {h:"Subjects", list:["Programming","Data structures","Calculus I to III","Linear algebra","Physics"]}
+   ],
+   aside:"explaining a system is how I learn it"},
+
+  {id:"kit", group:"kit", x:340, y:250, wide:true, title:"Toolkit", short:"Toolkit",
+   kit:[["Languages","JavaScript, Python, Java, C/C++, SQL"],["Web and backend","React, Node.js, Express, REST, WebSockets, Flask"],
+        ["Data","PostgreSQL, MySQL, NumPy, pandas, scikit learn"],["Infrastructure","Git, GitHub, Linux, AWS EC2, Nginx, CMake"]],
+   summary:"Every technology on this board, mapped to the projects that use it, plus the rest of my toolkit.",
+   sections:[
+     {h:"Skills by project", fig:"skills", cap:"A dot means the technology is part of that project's stack. Select a skill to highlight its projects on the board."}
+   ],
+   points:["Languages: JavaScript, Python, Java, C/C++, SQL","Web and backend: React, Node.js, Express, REST APIs, WebSockets, Flask","Data: PostgreSQL, MySQL, NumPy, pandas, SciPy, scikit learn, matplotlib","Infrastructure and tools: Git and GitHub, Linux, AWS EC2, Nginx, CMake, Maven, Gradle, Jupyter","Quantum: Qiskit, Qiskit Aer, IBM Quantum hardware"]}
+];
+
+/* skills mapped to the projects whose stack includes them */
+var MX_COLS = ["chat","cache","vm","team","shell","shotwall"];
+var SKILLS = [
+  {g:"Languages", rows:[
+    ["Java",["chat","vm"]],["Python",["team","shotwall"]],["C",["shell"]],["C++",["cache"]],["SQL",["cache"]],["HTML and CSS",["team"]]]},
+  {g:"Frameworks and libraries", rows:[
+    ["JavaFX",["chat"]],["Flask",["team"]],["NumPy and SciPy",["shotwall"]],["scikit learn",["shotwall"]],["Qiskit and Qiskit Aer",["shotwall"]]]},
+  {g:"Interfaces and formats", rows:[
+    ["JSON",["chat","cache"]],["REST",["chat"]],["WebSockets",["chat"]]]},
+  {g:"Systems and infrastructure", rows:[
+    ["Git and GitHub",["team","shell","shotwall"]],["Linux",["team","shell"]],["MySQL",["cache","team"]],["Nginx and Gunicorn",["team"]],["AWS EC2",["team"]],["IBM Quantum hardware",["shotwall"]]]}
+];
+var ALSO = "JavaScript, React, Node.js, Express, PostgreSQL, pandas, matplotlib, CMake, Maven, Gradle, Jupyter";
+
+/* timeline rows: dates as written in the sources, fuzzy marks a start known only to the year */
+var TL_START = "2025-08-01", TL_END = "2027-01-01";
+var SEMS = [["Fall 2025","2025-08-01","2026-01-01","Fall 25"],["Spring 2026","2026-01-01","2026-06-01","Spr 26"],["Summer 2026","2026-06-01","2026-08-01","Sum"],["Fall 2026","2026-08-01","2027-01-01","Fall 26"]];
+var TIMELINE = [
+  {lane:"Education", label:"B.S. Computer Science, SFSU", start:"2025-08-01", end:"2026-12-31", tip:"B.S. Computer Science, SFSU|August 2025 to December 2026, Minor in Mathematics", flag:true},
+  {lane:"Research", card:"shotwall", label:"The Shot Wall", start:"2026-01-01", open:true, tip:"The Shot Wall|January 2026 to now, with Prof. E. Wes Bethel"},
+  {lane:"Research", label:"IBM Qiskit Global Summer School", start:"2026-07-13", point:true, tip:"IBM Qiskit Global Summer School|July 2026, selected participant, labs on transpilation, noise models, and error mitigation"},
+  {lane:"Research", card:"hitl", label:"Robotics study", start:"2026-08-01", end:"2026-12-31", tip:"Human in the loop ML for robotics|August 2026 through the Fall 2026 term"},
+  {lane:"Teaching", card:"tutor", label:"Tutor, TASC", start:"2025-08-01", open:true, fuzzy:true, tip:"Computer science tutor|2025 to now, start shown faded because only the year is listed"},
+  {lane:"Teaching", card:"grader", label:"TA, CSC 413", start:"2026-08-01", end:"2026-12-31", tip:"Teaching assistant, CSC 413|Fall 2026"},
+  {lane:"Teaching", card:"guest", label:"Guest lecturer and reader, CSC 300", start:"2026-08-01", end:"2026-12-31", tip:"Guest lecturer and reader, CSC 300|Fall 2026"},
+  {lane:"Building", card:"cache", label:"Read through cache", start:"2026-01-20", end:"2026-05-20", tip:"Read through cache over MySQL|Spring 2026"},
+  {lane:"Building", card:"team", label:"Team web application", start:"2026-08-01", end:"2026-12-31", tip:"Team web application|Fall 2026, in progress"},
+  {lane:"Building", card:"shell", label:"Unix shell", start:"2026-09-25", point:true, tip:"Unix shell with pipes|Completed September 2026"}
+];
+
+var FINDS = [
+  ["0.003 \u2192 0.148","The measurement limit","With perfect measurements the quantum reservoir reaches a normalized error of 0.003. At a realistic 40,000 shots its best result averages 0.148, the same as a model with no quantum features. Every error mitigation method tried stopped at about that floor."],
+  ["R\u00b2 0.946","A law that predicts accuracy before running","From a noiseless simulation alone, a parameter free probit law predicts how accurate a noisy classifier will be, with a mean error of 3.25 percentage points and no fitted constants."],
+  ["39 of 44","Confirmed on real hardware","A live run on IBM Quantum hardware (ibm_marrakesh, 6,000 shots) classified 39 of 44 points correctly, the same accuracy as the shot noise simulation."]
+];
+var FAILS = [
+  {tag:"B5 v1", hyp:"Noisy accuracy would follow one curve in the average signal to noise ratio of the features, the same for every task.", got:"R\u00b2 = 0.20",
+   what:"An average hides where individual samples sit. Two tasks with the same average can have very different numbers of samples close to the decision boundary, and those are the samples shot noise flips.",
+   led:"Replaced by a per sample law: each sample's chance of being right is the normal CDF of its margin divided by its projected shot noise, averaged over samples. With zero fitted parameters it reaches R\u00b2 = 0.946."},
+  {tag:"B7", hyp:"A refinement to the gate noise correction would cut the remaining prediction error by 30 percent.", got:"2.5 percent",
+   what:"Treating gate noise as a loss of effective shots already lines the accuracy curves up (R\u00b2 0.927 against 0.851 without it). About 3 points of error remain, and the refinement barely moved them.",
+   led:"The residual is reported as a limit of the rule instead of being tuned away."},
+  {tag:"B8", hyp:"The same single scale factor would describe other noise channels, not only depolarizing noise.", got:"Did not hold",
+   what:"Depolarizing noise shrinks every expectation value toward zero, so one factor captures it. Amplitude damping (T1 relaxation) drives qubits toward |0\u27e9 instead, which one shrink factor cannot describe.",
+   led:"Amplitude damping is flagged as the genuinely harmful case for hardware runs."},
+  {tag:"B11", hyp:"The accuracy law would keep R\u00b2 above 0.9 on a second task family, the Mackey Glass tasks.", got:"R\u00b2 = 0.79",
+   what:"On direction, acceleration, and threshold tasks built from the Mackey Glass signal, the law still tracked accuracy but missed the preregistered bar.",
+   led:"The paper states the law's accuracy per task family instead of claiming it everywhere."},
+  {tag:"B12", hyp:"Concentrating the class signal in a few features would raise accuracy at a fixed shot budget.", got:"\u03c1 = \u22120.18",
+   what:"Concentration did not help. What predicted accuracy was the total information per shot, the summed squared class difference over shot noise variance: \u03c1 = +0.90 across 40 reservoirs.",
+   led:"A design rule: maximize information per shot. A star shaped coupling graph won and all to all coupling was worst."},
+  {tag:"B13", hyp:"Information per shot would rank reservoirs even when pooled across different tasks.", got:"\u03c1 = +0.07",
+   what:"Pooled across tasks the ranking disappeared, while within a single task it still held.",
+   led:"The design rule is applied one task at a time, and the paper says so."}
+];
+
+var KPIS = [
+  ["4.00","GPA at SFSU, 3.9 overall"],
+  ["Dec 2026","Graduation, B.S. Computer Science"],
+  ["2","Independent research studies this year"],
+  ["13","Preregistered benchmarks in the Shot Wall"],
+  ["R² 0.946","Shot Wall law predicting noisy accuracy before any run"],
+  ["100+","Students tutored one on one"]
+];
+
+var CLUSTERS = [
+  {g:"build", x:340, y:-410, t:"Things I built", s:"Systems and web, from the socket to the screen"},
+  {g:"research", x:-900, y:-410, t:"Research", s:"Measured, preregistered, reproducible"},
+  {g:"teach", x:-900, y:215, t:"Teaching", s:"At San Francisco State"}
+];
+
+var NOTES = [
+  {x:-215, y:-240, text:"start here", arrow:"M60 6 C 70 30, 80 44, 96 58"}
+];
+
+/* figures: inline SVG drawn from the numbers in the card text, themed through CSS variables */
+var figN = 0;
+function svgWrap(w, h, label, body){
+  var id = "ah" + (++figN);
+  var defs = '<defs>' +
+    '<marker id="'+id+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker>' +
+    '<marker id="'+id+'e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah em"/></marker>' +
+    '</defs>';
+  return '<svg class="fs" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(label)+'">' + defs + body.replace(/#AH/g, "#" + id) + '</svg>';
+}
+function T(x, y, s, cls, anchor){
+  return '<text x="'+x+'" y="'+y+'"'+(cls?' class="'+cls+'"':'')+(anchor?' text-anchor="'+anchor+'"':'')+'>'+s+'</text>';
+}
+function BX(x, y, w, h, title, sub, cls){
+  var cx = x + w/2, r = '<rect class="bx'+(cls?' '+cls:'')+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4"/>';
+  if(sub){
+    var subs = [].concat(sub), top = y + h/2 - (subs.length*14)/2 + 2;
+    r += T(cx, top, title, "b", "middle");
+    subs.forEach(function(s, i){ r += T(cx, top + 15 + i*14, s, "m s", "middle"); });
+  } else r += T(cx, y + h/2 + 4.5, title, "b", "middle");
+  return r;
+}
+/* a path through points, arrow: "a" muted head, "e" accent head, "aa"/"ee" heads at both ends */
+function LN(pts, cls, arrow){
+  var d = "M" + pts.map(function(p){ return p[0]+" "+p[1]; }).join(" L");
+  var head = arrow ? (arrow.charAt(0) === "e" ? "url(#AHe)" : "url(#AH)") : "";
+  return '<path class="ln'+(cls?' '+cls:'')+'" d="'+d+'"'+(head?' marker-end="'+head+'"':'')+(arrow && arrow.length === 2 ? ' marker-start="'+head+'"' : '')+'/>';
+}
+function tipAttr(t){ return ' data-tip="'+esc(t)+'"'; }
+
+var FIGS = {
+  /* the shot wall: a dot plot on a log axis */
+  wall: function(){
+    var X = function(v){ return 200 + (Math.log10(v) + 3) / 3 * 270; };
+    var b = "";
+    [0.001, 0.01, 0.1, 1].forEach(function(v){
+      b += '<line class="ax" x1="'+X(v)+'" y1="30" x2="'+X(v)+'" y2="168"/>' + T(X(v), 186, String(v), "m s", "middle");
+    });
+    b += '<line class="flr" x1="'+X(0.148)+'" y1="26" x2="'+X(0.148)+'" y2="168"/>' + T(X(0.148), 20, "floor", "m s", "middle");
+    // row labels
+    b += T(0, 50, "Exact readout", "b") + T(0, 65, "unlimited shots", "m s");
+    b += T(0, 100, "40,000 shots", "b") + T(0, 115, "best error mitigation", "m s");
+    b += T(0, 150, "No quantum features", "b") + T(0, 165, "classical floor", "m s");
+    // gap bracket between ideal and realistic
+    b += '<path class="ln ann" d="M'+X(0.003)+' 82 V76 H'+X(0.148)+' V82"/>' + T((X(0.003)+X(0.148))/2, 70, "about 50 times the error", "s ann", "middle");
+    // marks
+    b += '<circle class="dot" cx="'+X(0.003)+'" cy="55" r="6"/>' + T(X(0.003)-12, 59, "0.003", "s", "end");
+    b += '<line class="ln em w2" x1="'+X(0.142)+'" y1="105" x2="'+X(0.152)+'" y2="105"/><circle class="dot" cx="'+X(0.148)+'" cy="105" r="6"/>' + T(X(0.142)-12, 109, "0.142 to 0.152", "s", "end");
+    b += '<circle class="ring" cx="'+X(0.148)+'" cy="155" r="5.5"/>' + T(X(0.148)-12, 159, "0.148", "s", "end");
+    b += '<circle class="hit" cx="'+X(0.003)+'" cy="55" r="15"'+tipAttr("Exact readout|Normalized error 0.003 with unlimited shots")+'/>';
+    b += '<circle class="hit" cx="'+X(0.148)+'" cy="105" r="15"'+tipAttr("40,000 shots, best error mitigation|0.142 to 0.152 across seeds, mean 0.148")+'/>';
+    b += '<circle class="hit" cx="'+X(0.148)+'" cy="155" r="15"'+tipAttr("No quantum features|Normalized error 0.148")+'/>';
+    b += T(335, 206, "normalized mean squared error, log scale", "m s", "middle");
+    return svgWrap(484, 212, "Dot plot of normalized error: exact readout 0.003, quantum reservoir at 40,000 shots 0.142 to 0.152, model with no quantum features 0.148", b);
+  },
+
+  /* why: worst case standard error of a measured average, 1 over root N */
+  shots: function(){
+    var X = function(n){ return 70 + (Math.log10(n) - 1) * 45; };
+    var Y = function(e){ return 24 + (-Math.log10(e)) * 30; };
+    var b = "";
+    [[10,"10"],[1e3,"1,000"],[1e5,"100,000"],[1e7,"10 million"],[1e9,"1 billion"]].forEach(function(t){
+      b += '<line class="ax" x1="'+X(t[0])+'" y1="24" x2="'+X(t[0])+'" y2="174"/>' + T(X(t[0]), 190, t[1], "m s", "middle");
+    });
+    [[0.1,"0.1"],[0.01,"0.01"],[0.001,"0.001"],[0.0001,"0.0001"]].forEach(function(t){
+      b += '<line class="ax" x1="70" y1="'+Y(t[0])+'" x2="430" y2="'+Y(t[0])+'"/>' + T(62, Y(t[0])+4, t[1], "m s", "end");
+    });
+    b += T(70, 13, "standard error, worst case", "m s");
+    b += T(250, 208, "shots per measured feature, log scale", "m s", "middle");
+    b += LN([[X(10), Y(1/Math.sqrt(10))], [X(1e9), Y(1/Math.sqrt(1e9))]], "em w2");
+    // the step: a hundred times the shots buys ten times the precision
+    b += '<path class="ln ann" d="M'+X(1e5)+' '+Y(Math.pow(10,-2.5))+' V'+Y(Math.pow(10,-3.5))+' H'+X(1e7)+'"/>';
+    b += T(X(1e5)-6, (Y(Math.pow(10,-2.5))+Y(Math.pow(10,-3.5)))/2+4, "10 times the precision", "s ann", "end");
+    b += T((X(1e5)+X(1e7))/2, Y(Math.pow(10,-3.5))+16, "100 times the shots", "s ann", "middle");
+    // marked budgets, labelled in the empty space above the line
+    var h = [6000, 1/Math.sqrt(6000)], s = [40000, 1/Math.sqrt(40000)];
+    b += LN([[X(h[0])+5, Y(h[1])-4], [272, 46]], "") + T(276, 42, "6,000 shots, the hardware run", "s") + T(276, 56, "±0.013", "m s");
+    b += LN([[X(s[0])+5, Y(s[1])-4], [302, 80]], "") + T(306, 78, "40,000 shots", "s") + T(306, 92, "±0.005", "m s");
+    b += '<circle class="dot" cx="'+X(h[0])+'" cy="'+Y(h[1])+'" r="5"/><circle class="dot" cx="'+X(s[0])+'" cy="'+Y(s[1])+'" r="5"/>';
+    b += '<line class="cross" x1="0" y1="24" x2="0" y2="174"/><circle class="crossdot" r="4.5" cx="0" cy="0"/>';
+    b += '<rect class="hit" x="70" y="24" width="360" height="150" data-cross="shots"/>';
+    return svgWrap(484, 214, "Line chart on log scales: the worst case standard error of a measured feature falls as one over the square root of the shot count, about 0.013 at 6,000 shots and 0.005 at 40,000 shots", b);
+  },
+
+  /* hardware result: 44 points, 39 correct */
+  hw: function(){
+    var b = "", n = 0, size = 15, gap = 3;
+    for(var r = 0; r < 4; r++) for(var c = 0; c < 11; c++){
+      var ok = n < 39, x = c*(size+gap), y = 6 + r*(size+gap);
+      b += ok ? '<rect class="cell" x="'+x+'" y="'+y+'" width="'+size+'" height="'+size+'" rx="2"/>'
+              : '<rect class="cell no" x="'+(x+0.6)+'" y="'+(y+0.6)+'" width="'+(size-1.2)+'" height="'+(size-1.2)+'" rx="2"/>';
+      n++;
+    }
+    b += '<rect class="hit" x="0" y="0" width="200" height="80"'+tipAttr("Parity classification on IBM Quantum hardware|39 of 44 correct, accuracy 0.886, 6,000 shots")+'/>';
+    b += T(224, 32, "39 of 44", "big") + T(224, 54, "correct, accuracy 0.886", "s") + T(224, 70, "parity classification, 6,000 shots", "m s") + T(224, 85, "best of four readout settings", "m s");
+    return svgWrap(484, 92, "Waffle chart: 39 of 44 points classified correctly on IBM Quantum hardware", b);
+  },
+
+  /* shell: one parent, three children, two pipes */
+  shell: function(){
+    var b = BX(112, 8, 260, 48, "parent shell", "makes n minus 1 pipes, forks n children");
+    var kids = [[6,"command 1"],[182,"command 2"],[358,"command 3"]];
+    kids.forEach(function(k){ b += BX(k[0], 116, 120, 44, k[1], "execvp", "em"); });
+    b += LN([[190,56],[70,114]], "", "a") + LN([[242,56],[242,114]], "", "a") + LN([[294,56],[414,114]], "", "a");
+    b += T(248, 92, "fork", "m s");
+    b += LN([[126,138],[180,138]], "em", "e") + T(153, 130, "pipe 0", "s", "middle");
+    b += LN([[302,138],[356,138]], "em", "e") + T(329, 130, "pipe 1", "s", "middle");
+    b += T(66, 178, "stdout → pipe 0", "m s", "middle");
+    b += T(242, 178, "stdin ← pipe 0", "m s", "middle") + T(242, 193, "stdout → pipe 1", "m s", "middle");
+    b += T(418, 178, "stdin ← pipe 1", "m s", "middle");
+    b += T(242, 220, "dup2 wires each end, then every child and the parent close all pipe descriptors", "m s", "middle");
+    return svgWrap(484, 228, "Diagram: the parent shell forks three children, which are connected left to right by pipe 0 and pipe 1", b);
+  },
+
+  /* cache: one record reachable from three structures */
+  cache: function(){
+    var b = "", xs = [20, 112, 204, 296, 388], keys = ["51","8","42","17","23"];
+    // list
+    xs.forEach(function(x, i){
+      b += '<rect class="node'+(i===2?' em':'')+'" x="'+x+'" y="112" width="64" height="36" rx="4"/>' + T(x+32, 135, keys[i], i===2?"b":"", "middle");
+      if(i < 4) b += LN([[x+66,130],[x+90,130]], "", "aa");
+    });
+    b += T(452, 102, "FIFO list, owns each record", "m s", "end");
+    b += T(52, 165, "newest", "m s", "middle") + T(420, 165, "oldest, evicted first", "m s", "middle");
+    // hash table
+    for(var i = 0; i < 4; i++){
+      b += '<rect class="node" x="20" y="'+(10+i*17)+'" width="36" height="17"/>' + T(38, 23+i*17, String(i), "m s", "middle");
+    }
+    b += '<rect class="node em" x="84" y="44" width="40" height="17" rx="3"/>' + T(104, 57, "42", "s", "middle");
+    b += LN([[56,52.5],[82,52.5]], "", "a");
+    b += T(140, 24, "Hash table", "b") + T(140, 39, "lookup by key", "m s");
+    b += LN([[124,56],[228,110]], "em", "e");
+    // tree
+    var nodes = {r:[189,188,"23"], a:[145,216,"8"], c:[233,216,"42"], a2:[167,244,"17"], c2:[255,244,"51"]};
+    [["r","a"],["r","c"],["a","a2"],["c","c2"]].forEach(function(e){ b += '<line class="ax" x1="'+nodes[e[0]][0]+'" y1="'+nodes[e[0]][1]+'" x2="'+nodes[e[1]][0]+'" y2="'+nodes[e[1]][1]+'"/>'; });
+    Object.keys(nodes).forEach(function(k){ var n = nodes[k]; b += '<circle class="node'+(k==="c"?' em':'')+'" cx="'+n[0]+'" cy="'+n[1]+'" r="12"/>' + T(n[0], n[1]+4, n[2], "s", "middle"); });
+    b += LN([[233,203],[233,152]], "em", "e");
+    b += T(296, 204, "Binary search tree", "b") + T(296, 219, "sorted listings and", "m s") + T(296, 233, "range queries", "m s");
+    return svgWrap(484, 258, "Diagram: a record node in a FIFO list is pointed to by a hash table entry and by a binary search tree node", b);
+  },
+
+  /* interpreter: load, resolve, run */
+  vm: function(){
+    var b = "";
+    b += BX(2, 10, 100, 48, "Bytecode", "program file");
+    b += BX(128, 10, 100, 48, "Loader", "reflection, 21 ops");
+    b += BX(254, 10, 100, 48, "Label pass 1", "record addresses");
+    b += BX(380, 10, 100, 48, "Label pass 2", "patch references");
+    b += LN([[102,34],[126,34]], "", "a") + LN([[228,34],[252,34]], "", "a") + LN([[354,34],[378,34]], "", "a");
+    b += BX(142, 94, 200, 44, "Fetch and execute loop", "one instruction at a time", "em");
+    b += LN([[430,58],[430,116],[344,116]], "", "a");
+    b += BX(30, 168, 180, 40, "Runtime stack", "a frame for each call");
+    b += BX(254, 168, 220, 40, "Simulated 2 MB heap", "every access checked");
+    b += LN([[196,140],[150,166]], "", "aa") + LN([[288,140],[334,166]], "", "aa");
+    return svgWrap(484, 212, "Diagram: bytecode is loaded by reflection, labels are resolved in two passes, then a fetch and execute loop runs against a runtime stack and a simulated heap", b);
+  },
+
+  /* chat client: UI thread, background threads, server */
+  chat: function(){
+    var b = "";
+    b += T(70, 14, "UI thread", "m s", "middle") + T(248, 14, "Background threads", "m s", "middle") + T(421, 14, "Server", "m s", "middle");
+    b += '<rect class="bx em" x="4" y="24" width="132" height="152" rx="4"/>' + T(70, 54, "JavaFX", "b", "middle") + T(70, 69, "interface", "b", "middle");
+    ["rooms","history","presence","messages"].forEach(function(s, i){ b += T(70, 98 + i*16, s, "m s", "middle"); });
+    b += BX(180, 24, 136, 60, "REST client", "bearer token");
+    b += BX(180, 116, 136, 60, "WebSocket client", "open both ways");
+    b += BX(362, 24, 118, 152, "Chat server");
+    b += LN([[136,46],[178,46]], "", "a") + LN([[180,70],[138,70]], "em", "e");
+    b += LN([[180,150],[138,150]], "em", "e");
+    b += LN([[318,54],[360,54]], "", "aa") + T(339, 46, "JSON", "m s", "middle");
+    b += LN([[318,146],[360,146]], "", "aa") + T(339, 138, "live", "m s", "middle");
+    return svgWrap(484, 182, "Diagram: the JavaFX interface sends work to background REST and WebSocket clients that talk to the server, and results return to the interface thread", b);
+  },
+
+  /* team app: request path and repository workflow */
+  team: function(){
+    var b = "";
+    b += BX(2, 58, 68, 44, "Browser");
+    b += '<rect class="zone" x="86" y="26" width="396" height="100" rx="6"/>' + T(98, 44, "AWS EC2, Ubuntu Server 24.04", "m s");
+    b += BX(98, 56, 84, 48, "Nginx", "web server");
+    b += BX(196, 56, 84, 48, "Gunicorn", "app server");
+    b += BX(294, 56, 84, 48, "Flask", "Python app");
+    b += BX(392, 56, 84, 48, "MySQL 8", "database");
+    b += LN([[70,80],[96,80]], "", "a") + LN([[182,80],[194,80]], "", "a") + LN([[280,80],[292,80]], "", "a") + LN([[378,80],[390,80]], "", "a");
+    b += BX(86, 148, 122, 42, "Team 10", "contributors");
+    b += LN([[208,169],[248,169]], "", "a");
+    b += BX(250, 148, 232, 42, "Shared GitHub repository", "merge workflow, my role", "em");
+    return svgWrap(484, 196, "Diagram: browser requests pass through Nginx, Gunicorn, Flask and MySQL on an EC2 server, and team contributions flow into the shared GitHub repository", b);
+  },
+
+  /* robotics study: four stages with their status */
+  hitl: function(){
+    var steps = [
+      ["Groundwork","field vocabulary,","paper template","Done",true],
+      ["Deployment survey","real robot","deployments","Underway",false],
+      ["Interviews","10 to 20","companies","First one held",false],
+      ["Findings","a memo after","each interview","First shared",false]
+    ];
+    var b = "", xs = [60, 181, 302, 423];
+    b += '<line class="ax" x1="'+xs[0]+'" y1="26" x2="'+xs[3]+'" y2="26" style="stroke-width:2"/>';
+    steps.forEach(function(s, i){
+      var x = xs[i];
+      if(s[4]) b += '<circle class="done" cx="'+x+'" cy="26" r="13"/><path class="chk" d="M'+(x-5.5)+' 26.5 l3.8 3.8 l7.2 -7.6"/>';
+      else b += '<circle class="half" cx="'+x+'" cy="26" r="12"/><circle cx="'+x+'" cy="26" r="4" class="done"/>';
+      b += T(x, 62, s[0], "b", "middle") + T(x, 78, s[1], "m s", "middle") + T(x, 92, s[2], "m s", "middle");
+      b += T(x, 114, (s[4] ? "✓ " : "") + s[3], "s", "middle");
+    });
+    return svgWrap(484, 122, "Progress of the robotics study: groundwork done, deployment survey underway, first interview held, first findings shared", b);
+  },
+
+  skills: function(){ return matrixHTML(); }
+};
+
+function figHTML(key, cap){
+  if(!FIGS[key]) return "";
+  var inner = FIGS[key]();
+  if(key === "skills") return '<div class="fig">' + inner + (cap ? '<p class="also" style="margin-top:6px">'+cap+'</p>' : '') + '</div>';
+  return '<figure class="fig">' + inner + (cap ? '<figcaption>'+cap+'</figcaption>' : '') + '</figure>';
+}
+
+/* skills by project, as a table so it reads without a mouse too */
+function matrixHTML(){
+  var byId = {}; CARDS.forEach(function(c){ byId[c.id] = c; });
+  var max = 0; SKILLS.forEach(function(g){ g.rows.forEach(function(r){ max = Math.max(max, r[1].length); }); });
+  var h = '<div class="scrollx"><table class="mx"><caption class="sr" style="position:absolute;left:-9999px">Skills by project</caption><thead><tr><th scope="col"><span class="sr" style="position:absolute;left:-9999px">Skill</span></th>';
+  MX_COLS.forEach(function(id){ h += '<th class="col" scope="col" data-col="'+id+'"><button type="button" data-open="'+id+'" data-tip="'+esc(byId[id].title)+'|Open the project">'+esc(byId[id].short)+'</button></th>'; });
+  h += '<th class="cnt" scope="col">Projects</th></tr></thead><tbody>';
+  SKILLS.forEach(function(g){
+    h += '<tr class="grp"><th colspan="'+(MX_COLS.length+2)+'" scope="colgroup">'+esc(g.g)+'</th></tr>';
+    g.rows.slice().sort(function(a, b){ return b[1].length - a[1].length; }).forEach(function(r){
+      h += '<tr class="sk" data-skill-row="'+esc(r[0])+'"><th scope="row"><button type="button" data-skill="'+esc(r[0])+'" data-tip="'+esc(r[0])+'|Highlight the projects that use it">'+esc(r[0])+'</button></th>';
+      MX_COLS.forEach(function(id){
+        var on = r[1].indexOf(id) >= 0;
+        h += '<td class="c" data-col="'+id+'"'+(on ? ' data-tip="'+esc(r[0])+'|in '+esc(byId[id].title)+'"><span class="d" aria-label="used"></span>' : '><span style="position:absolute;left:-9999px">not used</span>')+'</td>';
+      });
+      h += '<td class="n"><span class="nb" style="width:'+(r[1].length/max*44)+'px"></span>'+r[1].length+'</td></tr>';
+    });
+  });
+  h += '</tbody></table></div><p class="also"><b>Also in my toolkit:</b> '+esc(ALSO)+'.</p>';
+  return h;
+}
+
+/* build the board */
+var world = document.getElementById("world");
+var wires = document.getElementById("wires");
+var cardEls = [];
+var byId = {};
+CARDS.forEach(function(c){ byId[c.id] = c; });
+
+function el(tag, cls, html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+// each card learns its skills from the matrix
+CARDS.forEach(function(c){ c.skills = []; });
+SKILLS.forEach(function(g){ g.rows.forEach(function(r){ r[1].forEach(function(id){ byId[id].skills.push(r[0]); }); }); });
+
+// title block centered at origin
+var TB = {x:-210, y:-150, w:420};
+var tb = el("div","title-block");
+tb.style.left=TB.x+"px"; tb.style.top=TB.y+"px";
+tb.innerHTML =
+  '<div class="tb-star" aria-hidden="true"><svg viewBox="-50 -50 100 100">'+
+  '<polygon points="0,-44 31,-31 44,0 31,31 0,44 -31,31 -44,0 -31,-31" opacity=".35"/>'+
+  '<polygon points="-31,-31 31,-31 31,31 -31,31"/><polygon points="0,-44 44,0 0,44 -44,0"/>'+
+  '<polygon points="0,-17 7,-7 17,0 7,7 0,17 -7,7 -17,0 -7,-7"/><circle r="2.6"/></svg></div>'+
+  '<div class="tb-name"><h1>Amirshayan<br>Hamidin</h1><p>'+esc(ME.role)+'</p></div>'+
+  '<div class="tb-row"><div class="tb-cell"><b>School</b>'+esc(ME.school)+'</div><div class="tb-cell"><b>Degree</b>'+esc(ME.degree)+'</div></div>'+
+  '<div class="tb-row"><div class="tb-cell"><b>GPA</b>'+esc(ME.gpa)+'</div><div class="tb-cell"><b>Work status</b>No sponsorship required</div></div>';
+world.appendChild(tb);
+
+function countOf(g){ return CARDS.filter(function(c){ return c.group===g; }).length; }
+var clusterEls = [];
+CLUSTERS.forEach(function(c){
+  var d=el("div","cluster",esc(c.t)+'<span class="n" aria-label="'+countOf(c.g)+' items">'+countOf(c.g)+'</span><small>'+esc(c.s)+'</small>');
+  d.style.left=c.x+"px"; d.style.top=c.y+"px"; d.dataset.cgroup=c.g; world.appendChild(d); clusterEls.push(d);
+});
+
+CARDS.forEach(function(c){
+  var b=el("button","card"+(c.wide?" wide":""));
+  b.type="button"; b.dataset.id=c.id;
+  b.setAttribute("aria-expanded","false");
+  b.style.left=c.x+"px"; b.style.top=c.y+"px";
+  if(c.w) b.style.width=c.w+"px";
+  var inner;
+  if(c.kit){
+    inner='<h3>'+esc(c.title)+'</h3>'+c.kit.map(function(k){return '<p class="kit"><b>'+esc(k[0])+'</b>'+esc(k[1])+'</p>';}).join("");
+    b.style.minHeight="176px";
+  } else {
+    inner=(c.when?'<span class="when">'+esc(c.when)+'</span>':'')+
+      '<h3'+(c.when?' style="margin-right:84px"':'')+'>'+esc(c.title)+'</h3><p class="stack">'+esc(c.stack)+'</p><p class="gist">'+esc(c.gist)+'</p>'+(c.badge?'<span class="badge">'+esc(c.badge)+'</span>':'');
+  }
+  b.innerHTML='<span class="rd">'+inner+'</span><span class="sk" aria-hidden="true"><span>'+esc(c.title)+'</span><i></i><i></i><i></i></span>';
+  b.addEventListener("click", function(ev){ if(moved) { ev.preventDefault(); return; } openPanel(c, b); revealCard(c); });
+  b.addEventListener("focus", function(){ revealCard(c); });
+  world.appendChild(b);
+  cardEls.push(b);
+  c.el=b;
+});
+
+// card heights are known after layout, so annotations and wires come next
+var noteEls = [];
+function layoutExtras(){
+  CARDS.forEach(function(c){ c.h=c.el.offsetHeight; c.wd=c.el.offsetWidth; });
+  var tbH=tb.offsetHeight;
+  var cy=TB.y+tbH/2;
+  var d="";
+  d+=curve(TB.x+TB.w, cy-30, 340, -370);
+  d+=curve(TB.x, cy-30, -560, -370);
+  var gu=byId.guest, ki=byId.kit;
+  d+=curve(TB.x+TB.w/2-60, TB.y+tbH, gu.x+150, gu.y);
+  d+=curve(TB.x+TB.w, cy+40, ki.x, ki.y+40);
+  wires.innerHTML='<path d="'+d+'"/>';
+  CARDS.forEach(function(c){
+    if(!c.aside) return;
+    var n=el("div","note",esc(c.aside));
+    n.style.left=(c.x+(c.group==="research"?20:18))+"px"; n.style.top=(c.y+c.h+(c.group==="research"?14:12))+"px";
+    n.dataset.card=c.id;
+    world.appendChild(n); noteEls.push(n);
+  });
+  NOTES.forEach(function(n){
+    var d2=el("div","note",esc(n.text)+'<svg width="110" height="66" aria-hidden="true"><path d="'+n.arrow+'"/><path d="M86 56 L96 58 L94 48"/></svg>');
+    d2.style.left=n.x+"px"; d2.style.top=n.y+"px"; world.appendChild(d2);
+  });
+}
+function curve(x1,y1,x2,y2){
+  var o=3000, mx=(x1+x2)/2;
+  return "M"+(x1+o)+" "+(y1+o)+" C "+(mx+o)+" "+(y1+o)+", "+(mx+o)+" "+(y2+o)+", "+(x2+o)+" "+(y2+o)+" ";
+}
+
+/* camera */
+var vp=document.getElementById("viewport");
+var cam={x:0,y:0,s:1};
+var MIN=.15, MAX=2.2;
+function apply(){
+  world.style.transform="translate("+cam.x+"px,"+cam.y+"px) scale("+cam.s+")";
+  vp.style.backgroundPosition=cam.x+"px "+cam.y+"px";
+  vp.style.backgroundSize=(24*cam.s)+"px "+(24*cam.s)+"px";
+  document.getElementById("zoomval").textContent=Math.round(cam.s*100)+"%";
+}
+function zoomAt(f, px, py){
+  var ns=Math.min(MAX,Math.max(MIN,cam.s*f)); f=ns/cam.s;
+  cam.x=px-(px-cam.x)*f; cam.y=py-(py-cam.y)*f; cam.s=ns; apply();
+}
+function bounds(){
+  var x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  CARDS.forEach(function(c){ x0=Math.min(x0,c.x); y0=Math.min(y0,c.y); x1=Math.max(x1,c.x+c.wd); y1=Math.max(y1,c.y+c.h+40); });
+  CLUSTERS.forEach(function(c){ y0=Math.min(y0,c.y); });
+  return {x0:x0,y0:y0,x1:x1,y1:y1};
+}
+var animId=null;
+function flyTo(tx,ty,ts){
+  if(animId) cancelAnimationFrame(animId);
+  if(reduced()){ cam.x=tx; cam.y=ty; cam.s=ts; apply(); return; }
+  var sx=cam.x, sy=cam.y, ss=cam.s, t0=performance.now(), D=520;
+  (function step(now){
+    var k=Math.min(1,(now-t0)/D); k=1-Math.pow(1-k,3);
+    cam.x=sx+(tx-sx)*k; cam.y=sy+(ty-sy)*k; cam.s=ss+(ts-ss)*k; apply();
+    if(k<1) animId=requestAnimationFrame(step);
+  })(t0);
+}
+function fit(animate){
+  var b=bounds(), W=vp.clientWidth, H=vp.clientHeight;
+  var pad = W<640 ? 24 : 80;
+  var s=Math.min((W-pad*2)/(b.x1-b.x0),(H-pad*2-150)/(b.y1-b.y0));
+  s=Math.min(1,Math.max(MIN,s));
+  var tx=W/2-((b.x0+b.x1)/2)*s, ty=(H+80)/2-((b.y0+b.y1)/2)*s;
+  if(animate) flyTo(tx,ty,s); else { cam.x=tx; cam.y=ty; cam.s=s; apply(); }
+}
+function home(){
+  // on narrow screens the whole board is too small to read, so start on the title block
+  var W=vp.clientWidth, H=vp.clientHeight;
+  var b=bounds();
+  var s=Math.min((W-160)/(b.x1-b.x0),(H-260)/(b.y1-b.y0));
+  if(s>=.42) return fit(false);
+  var s2=Math.min(.82,(W-32)/TB.w);
+  cam.s=s2; cam.x=W/2-(TB.x+TB.w/2)*s2; cam.y=H/2-(TB.y+tb.offsetHeight/2)*s2+30; apply();
+}
+function revealCard(c){
+  var W=vp.clientWidth, H=vp.clientHeight;
+  // while the detail panel is open on a wide screen, only the area to its left is free
+  var p=document.getElementById("panel");
+  var right=(p.classList.contains("open") && W>640) ? W-p.offsetWidth-32 : W;
+  var l=cam.x+c.x*cam.s, t=cam.y+c.y*cam.s, r=l+c.wd*cam.s, btm=t+c.h*cam.s;
+  if(l<20||t<110||r>right-20||btm>H-90){
+    var s=Math.max(cam.s,.6);
+    if(c.wd*s>right-40) s=Math.max(MIN,(right-40)/c.wd);
+    flyTo(right/2-(c.x+c.wd/2)*s, (H+40)/2-(c.y+c.h/2)*s, s);
+  }
+}
+
+/* pointer pan and pinch */
+var pts=new Map(), last=null, moved=false, downAt=null, pinch=null;
+vp.addEventListener("pointerdown",function(e){
+  if(e.button!==0 && e.pointerType==="mouse") return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){ last={x:e.clientX,y:e.clientY}; downAt={x:e.clientX,y:e.clientY}; moved=false; }
+  if(pts.size===2){ var a=Array.from(pts.values()); pinch={d:dist(a[0],a[1]),s:cam.s}; moved=true;
+    pts.forEach(function(_,id){ try{ vp.setPointerCapture(id); }catch(err){} }); }
+});
+vp.addEventListener("pointermove",function(e){
+  if(!pts.has(e.pointerId)) return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===2 && pinch){
+    var a=Array.from(pts.values()), d=dist(a[0],a[1]), mid={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};
+    zoomAt((pinch.s*d/pinch.d)/cam.s, mid.x, mid.y); moved=true; hideHint(); return;
+  }
+  if(pts.size===1 && last){
+    if(!moved && Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>5){ moved=true; vp.classList.add("dragging"); hideHint(); try{ vp.setPointerCapture(e.pointerId); }catch(err){} }
+    if(moved){ cam.x+=e.clientX-last.x; cam.y+=e.clientY-last.y; apply(); }
+    last={x:e.clientX,y:e.clientY};
+  }
+});
+function endPtr(e){
+  pts.delete(e.pointerId);
+  if(pts.size<2) pinch=null;
+  if(pts.size===1){ var a=Array.from(pts.values())[0]; last={x:a.x,y:a.y}; }
+  if(pts.size===0){ last=null; vp.classList.remove("dragging");
+    if(!moved && panelOpen() && !(e.target.closest && e.target.closest(".card"))) closePanel();
+    setTimeout(function(){ moved=false; },0);
+  }
+}
+vp.addEventListener("pointerup",endPtr);
+vp.addEventListener("pointercancel",endPtr);
+function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+vp.addEventListener("wheel",function(e){
+  e.preventDefault(); hideHint();
+  if(e.ctrlKey||e.metaKey){ zoomAt(Math.exp(-e.deltaY*0.01), e.clientX, e.clientY); }
+  else { cam.x-=e.deltaX; cam.y-=e.deltaY; apply(); }
+},{passive:false});
+
+/* toolbar */
+function center(){ return {x:vp.clientWidth/2,y:vp.clientHeight/2}; }
+document.getElementById("zin").onclick=function(){ var c=center(); zoomAt(1.25,c.x,c.y); };
+document.getElementById("zout").onclick=function(){ var c=center(); zoomAt(0.8,c.x,c.y); };
+document.getElementById("fit").onclick=function(){ fit(true); };
+var sk=document.getElementById("sketch");
+sk.onclick=function(){
+  var on=sk.getAttribute("aria-pressed")!=="true";
+  sk.setAttribute("aria-pressed",String(on));
+  sk.textContent=on?"Render":"Sketch";
+  cardEls.forEach(function(b,i){ setTimeout(function(){ b.classList.toggle("rendered",!on); }, reduced()?0:i*55); });
+};
+function reduced(){ return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+/* filters: one shared focus for the board, the overview and the matrix */
+var FOCUS={group:"all", skill:null};
+function inFocus(c){
+  if(FOCUS.skill) return c.skills.indexOf(FOCUS.skill)>=0;
+  if(FOCUS.group==="all") return true;
+  return c.group===FOCUS.group;
+}
+function chipsHTML(){
+  var h='<button type="button" class="chip" data-group="all" aria-pressed="false">All<span class="c">'+(CARDS.length-1)+'</span></button>';
+  GROUPS.forEach(function(g){ h+='<button type="button" class="chip" data-group="'+g.k+'" aria-pressed="false">'+esc(g.t)+'<span class="c">'+countOf(g.k)+'</span></button>'; });
+  h+='<button type="button" class="chip skill" data-clear="1" hidden></button>';
+  return h;
+}
+document.getElementById("filters").innerHTML=chipsHTML();
+function applyFocus(){
+  var any = FOCUS.skill || FOCUS.group!=="all";
+  CARDS.forEach(function(c){
+    var on = inFocus(c);
+    if(c.id==="kit") on = !any;
+    c.el.classList.toggle("dim", !on);
+    c.el.classList.toggle("hl", !!FOCUS.skill && on);
+  });
+  noteEls.forEach(function(n){ n.classList.toggle("dim", byId[n.dataset.card].el.classList.contains("dim")); });
+  clusterEls.forEach(function(d){
+    d.classList.toggle("dim", any && !CARDS.some(function(c){ return c.group===d.dataset.cgroup && inFocus(c); }));
+  });
+  document.querySelectorAll(".chip[data-group]").forEach(function(b){ b.setAttribute("aria-pressed", String(!FOCUS.skill && b.dataset.group===FOCUS.group)); });
+  document.querySelectorAll(".chip[data-clear]").forEach(function(b){
+    b.hidden=!FOCUS.skill; if(FOCUS.skill) b.textContent=FOCUS.skill+"  ×";
+    b.setAttribute("aria-label","Clear the "+(FOCUS.skill||"")+" highlight");
+  });
+  document.querySelectorAll("[data-row-card]").forEach(function(r){ r.classList.toggle("off", !inFocus(byId[r.dataset.rowCard])); });
+  document.querySelectorAll("tr[data-skill-row]").forEach(function(r){
+    var name=r.dataset.skillRow;
+    r.classList.toggle("on", FOCUS.skill===name);
+  });
+  document.querySelectorAll(".mx [data-col]").forEach(function(td){ td.classList.toggle("off", any && !inFocus(byId[td.dataset.col])); });
+  var st=document.getElementById("ov-status");
+  if(st){
+    var n=CARDS.filter(function(c){ return c.id!=="kit" && inFocus(c); }).length;
+    st.textContent = FOCUS.skill ? n+" with "+FOCUS.skill : (FOCUS.group==="all" ? "Showing everything" : "Showing "+n);
+  }
+}
+function setFocus(f){
+  FOCUS.group = f.group || "all";
+  FOCUS.skill = f.skill || null;
+  applyFocus();
+  if(!anyView() && (FOCUS.skill || FOCUS.group!=="all")) fitCards(CARDS.filter(function(c){ return c.id!=="kit" && inFocus(c); }));
+}
+function fitCards(list){
+  if(!list.length) return;
+  var x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  list.forEach(function(c){ x0=Math.min(x0,c.x); y0=Math.min(y0,c.y-60); x1=Math.max(x1,c.x+c.wd); y1=Math.max(y1,c.y+c.h+40); });
+  var W=vp.clientWidth, H=vp.clientHeight, p=document.getElementById("panel");
+  var right=(p.classList.contains("open") && W>640) ? W-p.offsetWidth-32 : W;
+  var s=Math.min(1,(right-80)/(x1-x0),(H-280)/(y1-y0)); s=Math.max(MIN,s);
+  flyTo(right/2-((x0+x1)/2)*s, (H+60)/2-((y0+y1)/2)*s, s);
+}
+
+/* tooltip, shared by every chart, bar and cell */
+var tip=document.getElementById("tip"), tipFor=null;
+function showTip(t, x, y){
+  var parts=String(t).split("|");
+  tip.innerHTML=""; var b=document.createElement("b"); b.textContent=parts[0]; tip.appendChild(b);
+  if(parts[1]){ var s=document.createElement("span"); s.textContent=parts[1]; tip.appendChild(s); }
+  tip.classList.add("on");
+  var w=tip.offsetWidth, h=tip.offsetHeight, X=x+14, Y=y+16;
+  if(X+w>innerWidth-8) X=x-w-14;
+  if(Y+h>innerHeight-8) Y=y-h-12;
+  tip.style.left=Math.max(8,X)+"px"; tip.style.top=Math.max(8,Y)+"px";
+}
+function hideTip(){ tip.classList.remove("on"); tipFor=null; }
+document.addEventListener("pointermove",function(e){
+  var c=e.target.closest && e.target.closest("[data-cross]");
+  if(c){ crossMove(c,e); return; }
+  var t=e.target.closest && e.target.closest("[data-tip]");
+  if(t && e.pointerType!=="touch"){ tipFor=t; showTip(t.getAttribute("data-tip"), e.clientX, e.clientY); }
+  else if(tipFor){ hideTip(); }
+  var col=e.target.closest && e.target.closest(".mx [data-col]");
+  document.querySelectorAll(".mx .colhl").forEach(function(x){ if(!col || x.dataset.col!==col.dataset.col || x.closest("table")!==col.closest("table")) x.classList.remove("colhl"); });
+  if(col) col.closest("table").querySelectorAll('[data-col="'+col.dataset.col+'"]').forEach(function(x){ x.classList.add("colhl"); });
+});
+document.addEventListener("pointerleave",hideTip);
+document.addEventListener("focusin",function(e){
+  var t=e.target.closest && e.target.closest("[data-tip]");
+  if(t){ var r=t.getBoundingClientRect(); showTip(t.getAttribute("data-tip"), r.left, r.bottom); } else hideTip();
+});
+document.addEventListener("focusout",hideTip);
+function crossMove(rect, e){
+  var svg=rect.ownerSVGElement, r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal;
+  var x=(e.clientX-r.left)/r.width*vb.width;
+  x=Math.max(70,Math.min(430,x));
+  var n=Math.pow(10,1+(x-70)/45), er=1/Math.sqrt(n), y=24+(-Math.log10(er))*30;
+  var ln=svg.querySelector(".cross"), dt=svg.querySelector(".crossdot");
+  ln.setAttribute("x1",x); ln.setAttribute("x2",x); ln.classList.add("on");
+  dt.setAttribute("cx",x); dt.setAttribute("cy",y); dt.classList.add("on");
+  var shots = n>=1e6 ? (n/1e6).toFixed(n>=1e7?0:1)+" million" : Math.round(n).toLocaleString("en-US");
+  showTip("±"+String(Number(er.toPrecision(2)))+"|"+shots+" shots per feature", e.clientX, e.clientY);
+  tipFor=rect;
+  rect.onpointerleave=function(){ ln.classList.remove("on"); dt.classList.remove("on"); hideTip(); };
+}
+
+/* delegated actions: open a card, focus a skill or group, clear */
+document.addEventListener("click",function(e){
+  var o=e.target.closest && e.target.closest("[data-open]");
+  if(o){ var c=byId[o.dataset.open]; if(c){ openPanel(c, c.el, false, o); if(!anyView()) revealCard(c); } return; }
+  var s=e.target.closest && e.target.closest("[data-skill]");
+  if(s){
+    var name=s.dataset.skill;
+    setFocus(FOCUS.skill===name ? {} : {skill:name});
+    if(panelOpen() && openCard && openCard.id==="kit" && FOCUS.skill){ closePanel(); }
+    return;
+  }
+  var g=e.target.closest && e.target.closest("[data-group]");
+  if(g){ setFocus({group:g.dataset.group}); return; }
+  var x=e.target.closest && e.target.closest("[data-clear]");
+  if(x){ setFocus({}); return; }
+});
+
+/* detail panel */
+var panel=document.getElementById("panel"), openEl=null, openCard=null, returnEl=null;
+function panelOpen(){ return panel.classList.contains("open"); }
+function listHTML(items){ return "<ul>"+items.map(function(p){return "<li>"+p+"</li>";}).join("")+"</ul>"; }
+function factsHTML(c){
+  if(!c.facts) return "";
+  return "<dl class='facts'>"+c.facts.map(function(f){return "<dt>"+esc(f[0])+"</dt><dd>"+f[1]+"</dd>";}).join("")+"</dl>";
+}
+function findsHTML(){
+  return "<div class='finds'>"+FINDS.map(function(f){ return "<div class='find'><b>"+esc(f[0])+"</b><div><p class='ft'>"+esc(f[1])+"</p><p class='fd'>"+esc(f[2])+"</p></div></div>"; }).join("")+"</div>";
+}
+function failsHTML(){
+  return "<p class='fintro'>Each hypothesis had a numeric pass bar fixed before any data was collected. Here is what was predicted, what actually happened, and what changed because of it.</p><div class='fails'>"+
+    FAILS.map(function(f){ return "<div class='fail'><div class='fhead'><span class='tag'>"+esc(f.tag)+"</span><span class='x'>\u2717 Falsified</span><span class='got'>"+esc(f.got)+"</span></div>"+
+      "<p class='hyp'>"+esc(f.hyp)+"</p><dl><dt>What happened</dt><dd>"+esc(f.what)+"</dd><dt>What it changed</dt><dd>"+esc(f.led)+"</dd></dl></div>"; }).join("")+"</div>";
+}
+function sectionsHTML(c, tag){
+  if(!c.sections) return (c.summary || !c.points) ? "" : listHTML(c.points);
+  return c.sections.map(function(s){
+    return "<div class='sec'><"+tag+">"+esc(s.h)+"</"+tag+">"+(s.finds?findsHTML():"")+(s.fails?failsHTML():"")+(s.fig?figHTML(s.fig, s.cap):"")+(s.p?"<p>"+s.p+"</p>":"")+(s.list?listHTML(s.list):"")+"</div>";
+  }).join("");
+}
+function statsHTML(c){
+  if(!c.stats) return "";
+  return "<div class='stats'>"+c.stats.map(function(s){return "<div><b>"+s[0]+"</b><span>"+esc(s[1])+"</span></div>";}).join("")+"</div>";
+}
+// card content is authored in this file, so it is inserted as HTML on purpose (for code, sup, b)
+function detailHTML(c){
+  var h="";
+  if(c.summary) h+="<p class='lede'>"+c.summary+"</p>";
+  if(c.leadFinds) h+=findsHTML();
+  h+=statsHTML(c)+factsHTML(c)+sectionsHTML(c,"h3");
+  return h;
+}
+function openPanel(c, b, keepFocus, from){
+  if(openEl) openEl.setAttribute("aria-expanded","false");
+  openEl=b; b.setAttribute("aria-expanded","true");
+  openCard=c; returnEl=from||b;
+  document.getElementById("p-title").textContent=c.title;
+  document.getElementById("p-stack").textContent=c.stack||"";
+  document.getElementById("p-when").textContent=c.when||"";
+  document.getElementById("p-body").innerHTML=detailHTML(c);
+  document.getElementById("p-aside").textContent=c.aside||"";
+  var i=CARDS.indexOf(c);
+  document.getElementById("p-count").textContent=(i+1)+" of "+CARDS.length;
+  document.getElementById("p-ask").href="mailto:hamideinamirshayan@gmail.com?subject="+encodeURIComponent("Question about "+c.title);
+  panel.scrollTop=0;
+  panel.classList.add("open"); panel.setAttribute("aria-hidden","false"); document.body.classList.add("panel-open");
+  applyFocus();
+  if(!keepFocus) document.getElementById("close").focus({preventScroll:true});
+  hideHint();
+}
+function step(d){
+  if(!openCard) return;
+  var i=(CARDS.indexOf(openCard)+d+CARDS.length)%CARDS.length, c=CARDS[i];
+  openPanel(c, c.el, true, returnEl);
+  if(!anyView()) revealCard(c);
+}
+document.getElementById("p-prev").onclick=function(){ step(-1); };
+document.getElementById("p-next").onclick=function(){ step(1); };
+function closePanel(){
+  panel.classList.remove("open"); panel.setAttribute("aria-hidden","true"); document.body.classList.remove("panel-open");
+  if(openEl){ openEl.setAttribute("aria-expanded","false"); openEl=null; }
+  if(returnEl && returnEl.focus) returnEl.focus({preventScroll:true});
+  openCard=null; returnEl=null; hideTip();
+}
+document.getElementById("close").onclick=closePanel;
+
+/* overview: the whole portfolio as one organized dashboard */
+var ov=document.getElementById("ov"), doc=document.getElementById("doc");
+function anyView(){ return ov.classList.contains("open") || doc.classList.contains("open"); }
+function D(s){ return new Date(s+"T00:00:00"); }
+function pct(s){ var a=D(TL_START), b=D(TL_END), t=(typeof s==="string")?D(s):s; return Math.max(0,Math.min(100,(t-a)/(b-a)*100)); }
+function timelineHTML(){
+  var now=new Date(), nowP=pct(now);
+  var h='<div class="tl"><div class="tl-bg">';
+  SEMS.forEach(function(s,i){ h+='<div class="tl-band'+(i%2?' alt':'')+'" style="left:'+pct(s[1])+'%;width:'+(pct(s[2])-pct(s[1]))+'%"><b><span class="lf">'+esc(s[0])+'</span><span class="ls">'+esc(s[3])+'</span></b></div>'; });
+  var m=D(TL_START), names=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  while(m<D(TL_END)){
+    var mid=new Date(m.getFullYear(), m.getMonth(), 15);
+    h+='<span class="tl-tick" style="left:'+pct(mid)+'%">'+names[m.getMonth()]+'</span>';
+    m=new Date(m.getFullYear(), m.getMonth()+1, 1);
+  }
+  if(nowP>0 && nowP<100) h+='<div class="tl-now" style="left:'+nowP+'%"><span>today</span></div>';
+  h+='</div><div class="tl-head"></div>';
+  var lastLane=null;
+  TIMELINE.forEach(function(it){
+    var first=it.lane!==lastLane; lastLane=it.lane;
+    var a=pct(it.start), endP=it.open ? nowP : pct(it.end||it.start);
+    var attrs=(it.card?' data-open="'+it.card+'"':'')+' data-tip="'+esc(it.tip)+'"'+' aria-label="'+esc(it.tip.replace("|",", "))+'"';
+    var cls=it.card?"":" static";
+    h+='<div class="tl-row'+(first?' first':'')+'"'+(it.card?' data-row-card="'+it.card+'"':'')+'><div class="tl-lane">'+(first?esc(it.lane):'')+'</div><div class="tl-plot">';
+    var labEnd = a>58;
+    if(it.point){
+      h+='<button type="button" class="tl-pt'+cls+'" style="left:'+a+'%"'+attrs+'></button>';
+      h+='<span class="tl-lab'+(labEnd?' end':'')+'" style="left:calc('+a+'% '+(labEnd?'+ 8px':'- 6px')+')">'+esc(it.label)+'</span>';
+    } else {
+      var w=Math.max(0.6,endP-a);
+      var bg;
+      var donePart = it.open ? 100 : Math.max(0,Math.min(100,(nowP-a)/(endP-a)*100));
+      if(it.fuzzy) bg='linear-gradient(90deg,color-mix(in srgb,var(--firuzeh) 12%,var(--card)) 0%,var(--firuzeh) 34%,var(--firuzeh) 100%)';
+      else if(donePart<100) bg='linear-gradient(90deg,var(--firuzeh) 0 '+donePart+'%,color-mix(in srgb,var(--firuzeh) 32%,var(--card)) '+donePart+'% 100%)';
+      else bg='var(--firuzeh)';
+      h+='<button type="button" class="tl-bar'+cls+'" style="left:'+a+'%;width:'+w+'%;background:'+bg+'"'+attrs+'></button>';
+      if(it.flag) h+='<button type="button" class="tl-pt static" style="left:'+endP+'%" data-tip="Graduation|December 2026" aria-label="Graduation, December 2026"></button>';
+      var lx = labEnd ? 'left:'+(a+w)+'%' : 'left:'+a+'%';
+      h+='<span class="tl-lab'+(labEnd?' end':'')+'" style="'+lx+'">'+esc(it.label)+(it.flag?'<span class="grad">  ·  graduation Dec 2026</span>':'')+'</span>';
+    }
+    h+='</div></div>';
+  });
+  h+='</div>';
+  h+='<div class="legend"><span><i class="lg-bar"></i>done, or to date</span><span><i class="lg-rest"></i>rest of the current term</span><span><i class="lg-fade"></i>start known only to the year</span><span><i class="lg-pt"></i>milestone</span><span><i class="lg-now"></i>today</span></div>';
+  return h;
+}
+function indexHTML(){
+  var order=["research","build","teach"], names={research:"Research",build:"Built",teach:"Teaching"};
+  var h='<div class="ix">';
+  order.forEach(function(g){
+    CARDS.filter(function(c){ return c.group===g; }).forEach(function(c){
+      h+='<div class="ix-row" data-row-card="'+c.id+'"><div><b>'+esc(c.title)+'</b><span class="g">'+esc(c.gist)+'</span><span class="st">'+esc(c.stack||"")+'</span></div>'+
+        '<span class="ar">'+names[g]+'</span><span class="wh">'+esc(c.when||"")+'</span><button type="button" class="btn" data-open="'+c.id+'">Details</button></div>';
+    });
+  });
+  return h+'</div>';
+}
+function buildOverview(){
+  var k=KPIS.map(function(x){ return '<div class="kpi"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>'; }).join("");
+  document.getElementById("ov-body").innerHTML=
+    "<header><div><h1>"+esc(ME.name)+"</h1><p class='meta' style='margin-top:8px'>"+esc(ME.role)+". "+esc(ME.auth)+".</p></div>"+
+    "<div class='hbtns'><button class='btn' data-view='doc'>Read as page</button><button class='btn' data-view='canvas'>Back to canvas</button></div></header>"+
+    "<div class='kpis'>"+k+"</div>"+
+    "<div class='ovbar'><span class='lab'>Filter</span><div class='chips'>"+chipsHTML()+"</div><span class='lab' id='ov-status' aria-live='polite'></span></div>"+
+    "<section class='osec'><h2>Timeline</h2><p class='sub'>Every dated item from Fall 2025 to graduation. Select a bar to open its details.</p>"+timelineHTML()+"</section>"+
+    "<div class='ogrid'>"+
+      "<section class='osec'><h2>Everything on the board</h2><p class='sub'>Grouped by area, with the stack for each.</p>"+indexHTML()+"</section>"+
+      "<section class='osec'><h2>Skills by project</h2><p class='sub'>Each dot is a technology in that project's stack. Select a skill to filter, or a project name to open it.</p>"+matrixHTML()+"</section>"+
+    "</div>";
+}
+function openOverview(){
+  buildOverview(); doc.classList.remove("open"); ov.classList.add("open"); ov.scrollTop=0; applyFocus();
+  var b=ov.querySelector("[data-view='canvas']"); if(b) b.focus({preventScroll:true});
+}
+function closeViews(){ ov.classList.remove("open"); doc.classList.remove("open"); document.getElementById("ovbtn").focus(); applyFocus(); }
+
+/* read as page */
+function buildDoc(){
+  var g=function(k){ return CARDS.filter(function(c){return c.group===k;}); };
+  var sec=function(t, list){
+    return "<h2>"+t+"</h2>"+list.map(function(c){
+      return "<h3>"+esc(c.title)+"</h3><p class='meta'>"+esc([c.stack,c.when].filter(Boolean).join(", "))+"</p>"+
+        (c.summary?"<p>"+c.summary+"</p>":"")+factsHTML(c)+sectionsHTML(c,"h4");
+    }).join("");
+  };
+  var kit=byId.kit;
+  document.getElementById("doc-body").innerHTML=
+    "<header><div><h1>"+esc(ME.name)+"</h1><p class='meta' style='margin-top:8px'>"+esc(ME.role)+"</p></div><div class='hbtns'><button class='btn' data-view='ov'>Overview</button><button class='btn' data-view='canvas'>Back to canvas</button></div></header>"+
+    "<p class='meta'><a href='mailto:hamideinamirshayan@gmail.com'>hamideinamirshayan@gmail.com</a>, <a href='https://www.linkedin.com/in/amirshayan-hamidin'>LinkedIn</a>, <a href='https://github.com/AmirshayanHamidin'>GitHub</a></p>"+
+    "<h2>Education</h2><p>"+esc(ME.school)+", "+esc(ME.degree)+", expected December 2026. GPA "+esc(ME.gpa)+". "+esc(ME.auth)+".</p>"+
+    sec("Research", g("research"))+sec("Things I built", g("build"))+sec("Teaching", g("teach"))+
+    "<h2>Toolkit</h2><ul>"+kit.points.map(function(p){return "<li>"+esc(p)+"</li>";}).join("")+"</ul>"+
+    "<h4>Skills by project</h4>"+matrixHTML();
+}
+function openDoc(){ buildDoc(); ov.classList.remove("open"); doc.classList.add("open"); doc.scrollTop=0; applyFocus(); var b=doc.querySelector("[data-view='canvas']"); if(b) b.focus({preventScroll:true}); }
+document.getElementById("read").onclick=openDoc;
+document.getElementById("ovbtn").onclick=openOverview;
+document.addEventListener("click",function(e){
+  var v=e.target.closest && e.target.closest("[data-view]");
+  if(!v) return;
+  if(v.dataset.view==="doc") openDoc(); else if(v.dataset.view==="ov") openOverview(); else closeViews();
+});
+
+/* keyboard */
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){ if(panelOpen()) closePanel(); else if(anyView()) closeViews(); else if(FOCUS.skill||FOCUS.group!=="all") setFocus({}); return; }
+  if(anyView()) return;
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  var stepPx=60;
+  if(e.key==="ArrowLeft"){ cam.x+=stepPx; apply(); }
+  else if(e.key==="ArrowRight"){ cam.x-=stepPx; apply(); }
+  else if(e.key==="ArrowUp"){ cam.y+=stepPx; apply(); }
+  else if(e.key==="ArrowDown"){ cam.y-=stepPx; apply(); }
+  else if(e.key==="+"||e.key==="="){ var c=center(); zoomAt(1.2,c.x,c.y); }
+  else if(e.key==="-"){ var c2=center(); zoomAt(1/1.2,c2.x,c2.y); }
+});
+
+var hint=document.getElementById("hint"), hinted=false;
+function hideHint(){ if(hinted) return; hinted=true; hint.style.opacity="0"; }
+
+/* first paint: everything starts as a sketch, then renders in once */
+function start(){
+  layoutExtras();
+  home();
+  applyFocus();
+  if(reduced()){ cardEls.forEach(function(b){ b.classList.add("rendered"); }); return; }
+  setTimeout(function(){
+    cardEls.forEach(function(b,i){ setTimeout(function(){ b.classList.add("rendered"); }, i*110); });
+  }, 650);
+}
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(start, start); } else { window.addEventListener("load", start); }
+window.addEventListener("resize", function(){ apply(); });
+
+})();
+</script>
+</body>
+</html>
